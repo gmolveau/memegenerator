@@ -21,7 +21,11 @@ upgrade: ## upgrade all dependencies
 
 ### Application
 
+### Run application
 
+PHONY: run-dev
+run-dev:
+	uv run uvicorn src.main:app --reload --host 0.0.0.0 --port=3000
 
 ### Database
 

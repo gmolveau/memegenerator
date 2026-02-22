@@ -15,6 +15,12 @@ install-dev: ## Install development dependencies
 upgrade: ## Upgrade all dependencies
 	npm update --loglevel verbose
 
+### Application
+
+.PHONY: run-dev
+run-dev: ## Run dev mode
+	pnpm run dev --open
+
 ### Tests
 
 .PHONY: tests
