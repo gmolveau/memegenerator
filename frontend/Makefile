@@ -5,6 +5,67 @@ SHELL := bash
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
+### Dependencies
+
+.PHONY: install-dev
+install-dev: ## Install development dependencies
+	npm ci
+
+.PHONY: upgrade
+upgrade: ## Upgrade all dependencies
+	npm update --loglevel verbose
+
+### Tests
+
+.PHONY: tests
+tests: ## Run frontend tests
+	npm run tests
+
+### Format and checks
+
+.PHONY: lint-check
+lint-check: ## Check lint code.
+	npm run type-check
+	npm run lint-check
+
+.PHONY: lint-fix
+lint-fix: ## Lint code and fix.
+	npm run type-check
+	npm run lint-fix
+
+.PHONY: lint
+lint: lint-fix ## Lint code and fix.
+
+.PHONY: format-fix
+format-fix: ## Fix format.
+	npm run format-fix
+
+.PHONY: format
+format: format-fix ## Fix format.
+
+.PHONY: format-check
+format-check: ## Format code check.
+	npm run format-check
+
+.PHONY: audit-check
+audit-check: ## Audit dependencies.
+	npm audit
+
+.PHONY: checks
+checks: ## Run checks on code (lint, format, api types)
+	$(MAKE) lint-check
+	$(MAKE) format-check
+	$(MAKE) openapi-check
+	# $(MAKE) audit-check
+
+### Misc
+
+.PHONY: clean
+clean: ## Clean folder
+	rm -rf node_modules
+	rm -rf test-reports
+	rm -rf dist
+
 ### Help
 
 .PHONY: help

@@ -13,7 +13,9 @@ if config.config_file_name is not None:
 
 def get_engine_url():
     try:
-        return database_engine.url.render_as_string(hide_password=False).replace("%", "%%")
+        return database_engine.url.render_as_string(hide_password=False).replace(
+            "%", "%%"
+        )
     except AttributeError:
         return str(database_engine.url).replace("%", "%%")
 

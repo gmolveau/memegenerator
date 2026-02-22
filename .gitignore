@@ -1,10 +1,16 @@
+# common
+.idea/
+*.env
+.devcontainer/customize.sh
+
+# backend
 __pycache__
 .pytest_cache
 .venv/
-*.env
 .coverage
 coverage.xml
 .report/
 .ruff_cache/
-.idea
-.devcontainer/customize.sh
+
+# frontend
+node_modules/

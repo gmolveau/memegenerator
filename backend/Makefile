@@ -59,11 +59,11 @@ alembic-check: ## Run the alembic check
 
 .PHONY: checks
 checks:
-	$(MAKE) ty ruff-check bandit
+	@$(MAKE) ty ruff-check bandit
 
 PHONY: format
 format:
-	$(MAKE) ruff
+	@$(MAKE) ruff
 
 ### Misc
 

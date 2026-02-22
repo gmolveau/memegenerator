@@ -5,6 +5,16 @@ SHELL := bash
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
+PHONY: format
+format:
+	@$(MAKE) -C backend format
+	@$(MAKE) -C frontend format
+
+PHONY: clean
+clean:
+	@$(MAKE) -C backend clean
+	@$(MAKE) -C frontend clean
+
 ### Help
 
 .PHONY: help
