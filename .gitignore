@@ -2,15 +2,3 @@
 .idea/
 *.env
 .devcontainer/customize.sh
-
-# backend
-__pycache__
-.pytest_cache
-.venv/
-.coverage
-coverage.xml
-.report/
-.ruff_cache/
-
-# frontend
-node_modules/
