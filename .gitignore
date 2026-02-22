@@ -1,0 +1,10 @@
+__pycache__
+.pytest_cache
+.venv/
+*.env
+.coverage
+coverage.xml
+.report/
+.ruff_cache/
+.idea
+.devcontainer/customize.sh
