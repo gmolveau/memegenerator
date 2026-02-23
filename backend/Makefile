@@ -21,8 +21,12 @@ upgrade: ## Upgrade all dependencies
 
 ### Application
 
+PHONY: create-volumes
+create-volumes: ## Create required folders
+	@mkdir -p data/templates
+
 PHONY: run-dev
-run-dev:
+run-dev: create-volumes ## Run the app in dev mode
 	uv run uvicorn src.web.main:app --reload --host 0.0.0.0 --port=8000
 
 ### Database

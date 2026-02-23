@@ -46,7 +46,7 @@
 		loading = true;
 		error = '';
 		try {
-			templates = await fetchTemplates(search || undefined);
+			({ templates } = await fetchTemplates(search || undefined));
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load templates';
 		} finally {
@@ -203,6 +203,7 @@
 					<img
 						src={template.image_url}
 						alt={template.name}
+						loading="lazy"
 						class="aspect-square w-full object-cover"
 					/>
 					<div

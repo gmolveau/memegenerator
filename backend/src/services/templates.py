@@ -5,8 +5,8 @@ import uuid
 from pathlib import Path
 
 from fastapi import UploadFile
+from sqlalchemy import func
 from sqlalchemy.orm import Session
-
 from src.models.template import Template
 
 TEMPLATES_DIR = Path("data/templates")
@@ -19,12 +19,30 @@ EXTENSION_MAP = {
 }
 
 
-def list_templates(db: Session, search: str | None = None) -> list[Template]:
-    query = db.query(Template)
+def list_templates(
+    db: Session,
+    search: str | None = None,
+    limit: int = 40,
+    offset: int = 0,
+) -> tuple[list[Template], int]:
+    filters = []
     if search:
         term = f"%{search.lower()}%"
-        query = query.filter(Template.name.ilike(term) | Template.keywords.ilike(term))
-    return query.order_by(Template.created_at.desc()).all()
+        filters.append(Template.name.ilike(term) | Template.keywords.ilike(term))
+
+    # Single query: fetch rows + total via window function (one DB round-trip)
+    total_col = func.count().over().label("total")
+    rows = (
+        db.query(Template, total_col)
+        .filter(*filters)
+        .order_by(Template.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    if not rows:
+        return [], 0
+    return [r for r, _ in rows], rows[0].total
 
 
 def get_template(db: Session, template_id: int) -> Template | None:
@@ -49,6 +67,22 @@ def create_template(
         keywords=",".join(k.strip() for k in keywords if k.strip()),
     )
     db.add(template)
+    db.commit()
+    db.refresh(template)
+    return template
+
+
+def update_template(
+    db: Session,
+    template_id: int,
+    name: str,
+    keywords: list[str],
+) -> Template | None:
+    template = get_template(db, template_id)
+    if not template:
+        return None
+    template.name = name
+    template.keywords = ",".join(k.strip() for k in keywords if k.strip())
     db.commit()
     db.refresh(template)
     return template

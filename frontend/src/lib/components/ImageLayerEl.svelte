@@ -46,11 +46,13 @@
 	}
 
 	// --- Resize ---
+	let resizing = $state(false);
 	let startW = 0,
 		startH = 0;
 
 	function onResizeDown(e: PointerEvent) {
 		e.stopPropagation();
+		resizing = true;
 		startX = e.clientX;
 		startY = e.clientY;
 		startW = layer.width;
@@ -59,10 +61,15 @@
 	}
 
 	function onResizeMove(e: PointerEvent) {
+		if (!resizing) return;
 		onupdate({
 			width: Math.max(20, startW + (e.clientX - startX)),
 			height: Math.max(20, startH + (e.clientY - startY))
 		});
+	}
+
+	function onResizeUp() {
+		resizing = false;
 	}
 
 	// --- Rotate ---
@@ -132,7 +139,7 @@
 			class="absolute right-0 bottom-0 h-4 w-4 cursor-se-resize bg-indigo-500 opacity-80"
 			onpointerdown={onResizeDown}
 			onpointermove={onResizeMove}
-			onpointerup={() => {}}
+			onpointerup={onResizeUp}
 		></div>
 	{/if}
 </div>

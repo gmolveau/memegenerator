@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class TemplateResponse(BaseModel):
@@ -13,6 +13,11 @@ class TemplateResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class TemplateUpdateRequest(BaseModel):
+    name: str = Field(..., min_length=1)
+    keywords: list[str] = Field(..., min_length=1)
 
 
 class TemplateListResponse(BaseModel):
