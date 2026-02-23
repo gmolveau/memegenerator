@@ -65,16 +65,17 @@ npm install -g pnpm
 </div>
 </details>
 
-- `make install-dev`
 - Open two terminals :
 
 ```bash
 cd backend
+make install-dev
 make migrate
 make run-dev
 ```
 
 ```bash
 cd frontend
+make install-dev
 make run-dev
 ```
