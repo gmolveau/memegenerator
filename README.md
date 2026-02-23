@@ -66,6 +66,7 @@ npm install -g pnpm
 
 ```bash
 cd backend
+make migrate
 make run-dev
 ```
 
