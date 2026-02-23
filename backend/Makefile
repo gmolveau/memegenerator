@@ -8,34 +8,32 @@ MAKEFLAGS += --no-builtin-rules
 ### Dependencies
 
 .PHONY: install
-install: ## install prod dependencies
+install: ## Install prod dependencies
 	uv sync --locked
 
 .PHONY: install-dev
-install-dev: ## install prod+dev dependencies
+install-dev: ## Install prod+dev dependencies
 	uv sync --locked --dev
 
 .PHONY: upgrade
-upgrade: ## upgrade all dependencies
+upgrade: ## Upgrade all dependencies
 	uv sync --upgrade
 
 ### Application
 
-### Run application
-
 PHONY: run-dev
 run-dev:
-	uv run uvicorn src.main:app --reload --host 0.0.0.0 --port=3000
+	uv run uvicorn src.web.main:app --reload --host 0.0.0.0 --port=8000
 
 ### Database
 
 .PHONY: new-migrate
 new-migrate: ## Auto-generate a new migration.
-	DOTENV=.env.dev uv run alembic -c migrations/alembic.ini revision --autogenerate -m $(NAME)
+	uv run alembic -c src/db/migrations/alembic.ini revision --autogenerate -m $(NAME)
 
 .PHONY: migrate
 migrate: ## Run the migrations (will update the database).
-	uv run alembic -c migrations/alembic.ini upgrade head
+	uv run alembic -c src/db/migrations/alembic.ini upgrade head
 
 ### Format and checks
 
@@ -59,20 +57,20 @@ bandit:	## Run a static security analysis of the code using bandit
 
 .PHONY: alembic-check
 alembic-check: ## Run the alembic check
-	uv run alembic -c migrations/alembic.ini check
+	uv run alembic -c src/db/migrations/alembic.ini check
 
 .PHONY: checks
-checks:
+checks: ## Run all checks
 	@$(MAKE) ty ruff-check bandit
 
 PHONY: format
-format:
+format: ## Format code
 	@$(MAKE) ruff
 
 ### Misc
 
 .PHONY: clean
-clean:
+clean: ## Clean folder, delete temp folders
 	rm -rf .venv
 	find . -type f -name '*.pyc' -delete
 	find . -type d -name '__pycache__' -delete
@@ -85,7 +83,7 @@ clean:
 ### Help
 
 .PHONY: help
-help: ## help message
+help: ## Show help message
 	@echo "Usage:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 

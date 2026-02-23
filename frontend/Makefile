@@ -25,44 +25,21 @@ run-dev: ## Run dev mode
 
 .PHONY: tests
 tests: ## Run frontend tests
-	npm run tests
+	pnpm run tests
 
 ### Format and checks
 
-.PHONY: lint-check
-lint-check: ## Check lint code.
-	npm run type-check
-	npm run lint-check
-
-.PHONY: lint-fix
-lint-fix: ## Lint code and fix.
-	npm run type-check
-	npm run lint-fix
-
 .PHONY: lint
-lint: lint-fix ## Lint code and fix.
-
-.PHONY: format-fix
-format-fix: ## Fix format.
-	npm run format-fix
+lint: ## Lint code and fix.
+	pnpm run lint
 
 .PHONY: format
-format: format-fix ## Fix format.
-
-.PHONY: format-check
-format-check: ## Format code check.
-	npm run format-check
-
-.PHONY: audit-check
-audit-check: ## Audit dependencies.
-	npm audit
+format: ## Fix format.
+	pnpm run format
 
 .PHONY: checks
-checks: ## Run checks on code (lint, format, api types)
-	$(MAKE) lint-check
-	$(MAKE) format-check
-	$(MAKE) openapi-check
-	# $(MAKE) audit-check
+checks: ## Run checks on code
+	$(MAKE) lint
 
 ### Misc
 

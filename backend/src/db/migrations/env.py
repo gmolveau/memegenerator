@@ -1,8 +1,7 @@
 from logging.config import fileConfig
 
 from alembic import context
-
-from src.environment.database import database_engine
+from src.db.database import database_engine
 from src.models import DBBaseModel
 
 config = context.config

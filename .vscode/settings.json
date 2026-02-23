@@ -30,7 +30,8 @@
   "eslint.useFlatConfig": true,
   "eslint.workingDirectories": ["frontend"],
   "files.associations": {
-    "*.env": "shellscript"
+    "*.env": "shellscript",
+    "*.css": "tailwindcss"
   },
   "makefile.configureOnOpen": false,
   "prettier.enable": true,
