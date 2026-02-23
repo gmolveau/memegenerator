@@ -83,7 +83,7 @@ Because the editing surface is DOM-based, export cannot simply capture the scree
 
 #### CORS and the tainted canvas
 
-`toDataURL()` throws a `DOMException` if *any* image drawn on the canvas was loaded from a cross-origin URL without a CORS request. Template images come from the backend (`localhost:8000`) while the frontend runs on a different port, so they are cross-origin.
+`toDataURL()` throws a `DOMException` if _any_ image drawn on the canvas was loaded from a cross-origin URL without a CORS request. Template images come from the backend (`localhost:8000`) while the frontend runs on a different port, so they are cross-origin.
 
 Two things must be true simultaneously to avoid tainting:
 

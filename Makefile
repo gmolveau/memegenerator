@@ -5,6 +5,15 @@ SHELL := bash
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
+### Dependencies
+
+PHONY: install-dev
+install-dev: ## Install backend and frontend dependencies (dev)
+	@$(MAKE) -C backend install-dev
+	@$(MAKE) -C frontend install-dev
+
+### Format and checks
+
 PHONY: format
 format:
 	@$(MAKE) -C backend format

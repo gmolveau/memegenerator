@@ -13,6 +13,7 @@ export interface TextLayer {
 	y: number; // px from top of canvas
 	width: number;
 	height: number;
+	rotation: number; // degrees, clockwise
 	fontSize: number;
 	fontFamily: string;
 	color: string;
@@ -30,6 +31,7 @@ export interface ImageLayer {
 	y: number;
 	width: number;
 	height: number;
+	rotation: number; // degrees, clockwise
 }
 
 export type Effect = 'none' | 'grayscale' | 'blur' | 'sharpen' | 'sepia' | 'invert';

@@ -11,17 +11,18 @@
 
 	let { layer, selected, onselect, onupdate, onremove }: Props = $props();
 
+	let el = $state<HTMLDivElement | null>(null);
+
+	// --- Drag ---
 	let dragging = $state(false);
-	let resizing = $state(false);
 	let startX = 0,
 		startY = 0,
 		startLayerX = 0,
 		startLayerY = 0;
-	let startW = 0,
-		startH = 0;
 
 	function onPointerDown(e: PointerEvent) {
-		if ((e.target as HTMLElement).dataset.resize) return;
+		const target = e.target as HTMLElement;
+		if (target.dataset.resize || target.dataset.rotate) return;
 		e.stopPropagation();
 		onselect();
 		dragging = true;
@@ -44,9 +45,12 @@
 		dragging = false;
 	}
 
+	// --- Resize ---
+	let startW = 0,
+		startH = 0;
+
 	function onResizeDown(e: PointerEvent) {
 		e.stopPropagation();
-		resizing = true;
 		startX = e.clientX;
 		startY = e.clientY;
 		startW = layer.width;
@@ -55,25 +59,49 @@
 	}
 
 	function onResizeMove(e: PointerEvent) {
-		if (!resizing) return;
 		onupdate({
 			width: Math.max(20, startW + (e.clientX - startX)),
 			height: Math.max(20, startH + (e.clientY - startY))
 		});
 	}
 
-	function onResizeUp() {
-		resizing = false;
+	// --- Rotate ---
+	let rotating = $state(false);
+	let centerX = 0,
+		centerY = 0,
+		startAngle = 0,
+		startRotation = 0;
+
+	function onRotateDown(e: PointerEvent) {
+		e.stopPropagation();
+		rotating = true;
+		const rect = el!.getBoundingClientRect();
+		centerX = rect.left + rect.width / 2;
+		centerY = rect.top + rect.height / 2;
+		startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+		startRotation = layer.rotation;
+		(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+	}
+
+	function onRotateMove(e: PointerEvent) {
+		if (!rotating) return;
+		const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+		onupdate({ rotation: startRotation + (angle - startAngle) });
+	}
+
+	function onRotateUp() {
+		rotating = false;
 	}
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
+	bind:this={el}
 	data-layer="image"
 	role="button"
 	tabindex="0"
 	class="absolute cursor-move touch-none {selected ? 'ring-2 ring-indigo-500 ring-offset-1' : ''}"
-	style="left:{layer.x}px; top:{layer.y}px; width:{layer.width}px; height:{layer.height}px;"
+	style="left:{layer.x}px; top:{layer.y}px; width:{layer.width}px; height:{layer.height}px; transform:rotate({layer.rotation}deg); transform-origin:center;"
 	onpointerdown={onPointerDown}
 	onpointermove={onPointerMove}
 	onpointerup={onPointerUp}
@@ -87,12 +115,24 @@
 	/>
 
 	{#if selected}
+		<!-- Rotation handle -->
+		<div
+			data-rotate="true"
+			class="absolute -top-7 left-1/2 flex h-5 w-5 -translate-x-1/2 cursor-grab items-center justify-center rounded-full bg-indigo-500 text-xs text-white opacity-90 select-none active:cursor-grabbing"
+			onpointerdown={onRotateDown}
+			onpointermove={onRotateMove}
+			onpointerup={onRotateUp}
+		>
+			↻
+		</div>
+
+		<!-- Resize handle -->
 		<div
 			data-resize="se"
 			class="absolute right-0 bottom-0 h-4 w-4 cursor-se-resize bg-indigo-500 opacity-80"
 			onpointerdown={onResizeDown}
 			onpointermove={onResizeMove}
-			onpointerup={onResizeUp}
+			onpointerup={() => {}}
 		></div>
 	{/if}
 </div>

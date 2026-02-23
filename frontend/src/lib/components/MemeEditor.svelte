@@ -82,33 +82,42 @@
 		ctx.drawImage(templateImg, 0, 0, CANVAS_WIDTH, canvasHeight);
 		ctx.filter = 'none';
 
-		// Draw image layers
+		// Draw image layers (rotate around their center)
 		for (const layer of editor.imageLayers) {
 			await new Promise<void>((resolve) => {
 				const img = new Image();
 				img.onload = () => {
-					ctx.drawImage(img, layer.x, layer.y, layer.width, layer.height);
+					ctx.save();
+					ctx.translate(layer.x + layer.width / 2, layer.y + layer.height / 2);
+					ctx.rotate((layer.rotation * Math.PI) / 180);
+					ctx.drawImage(img, -layer.width / 2, -layer.height / 2, layer.width, layer.height);
+					ctx.restore();
 					resolve();
 				};
 				img.src = layer.src;
 			});
 		}
 
-		// Draw text layers
+		// Draw text layers (rotate around their center)
 		for (const layer of editor.textLayers) {
 			ctx.save();
+			ctx.translate(layer.x + layer.width / 2, layer.y + layer.height / 2);
+			ctx.rotate((layer.rotation * Math.PI) / 180);
+			ctx.translate(-layer.width / 2, -layer.height / 2);
 			const weight = layer.bold ? 'bold ' : '';
 			const style = layer.italic ? 'italic ' : '';
 			ctx.font = `${style}${weight}${layer.fontSize}px ${layer.fontFamily}`;
 			ctx.textAlign = layer.align;
 			ctx.fillStyle = layer.color;
+			const tx =
+				layer.align === 'center' ? layer.width / 2 : layer.align === 'right' ? layer.width : 0;
 			if (layer.outlineWidth > 0) {
 				ctx.strokeStyle = layer.outlineColor;
 				ctx.lineWidth = layer.outlineWidth * 2;
 				ctx.lineJoin = 'round';
-				ctx.strokeText(layer.text, textX(layer), layer.y + layer.fontSize);
+				ctx.strokeText(layer.text, tx, layer.fontSize);
 			}
-			ctx.fillText(layer.text, textX(layer), layer.y + layer.fontSize);
+			ctx.fillText(layer.text, tx, layer.fontSize);
 			ctx.restore();
 		}
 
@@ -118,15 +127,18 @@
 		link.click();
 	}
 
-	function textX(layer: TextLayer): number {
-		if (layer.align === 'center') return layer.x + layer.width / 2;
-		if (layer.align === 'right') return layer.x + layer.width;
-		return layer.x;
-	}
+	// --- Layer list panel ---
+	let expandedId = $state<string | null>(null);
 
-	// --- Selected layer properties ---
-	const selectedText = $derived(editor.selectedTextLayer);
-	const selectedImage = $derived(editor.imageLayers.find((l) => l.id === editor.selectedLayerId));
+	// When a layer is selected on the canvas, auto-expand it in the list.
+	$effect(() => {
+		expandedId = editor.selectedLayerId;
+	});
+
+	function toggleLayer(id: string) {
+		editor.selectLayer(id);
+		expandedId = expandedId === id ? null : id;
+	}
 </script>
 
 <div class="flex flex-col gap-4 lg:flex-row">
@@ -172,24 +184,35 @@
 
 	<!-- Editor canvas -->
 	<div class="flex flex-1 flex-col gap-3">
+		<!--
+			Outer div: positions layers, allows overflow so rotation handles
+			can appear outside the image boundary.
+			Inner div: clips the background image to the rounded border.
+		-->
 		<div
 			bind:this={containerEl}
 			onclick={deselect}
 			role="presentation"
-			class="relative overflow-hidden rounded-lg border border-gray-300 bg-gray-900 select-none"
+			class="relative select-none"
 			style="width:{CANVAS_WIDTH}px; height:{canvasHeight}px;"
 		>
-			{#if editor.template}
-				<img
-					src={editor.template.image_url}
-					alt={editor.template.name}
-					draggable="false"
-					crossorigin="anonymous"
-					class="pointer-events-none absolute inset-0 h-full w-full object-cover"
-					style="filter:{filterMap[editor.effect]}"
-				/>
-			{/if}
+			<!-- Background image clipped to rounded border -->
+			<div
+				class="pointer-events-none absolute inset-0 overflow-hidden rounded-lg border border-gray-300 bg-gray-900"
+			>
+				{#if editor.template}
+					<img
+						src={editor.template.image_url}
+						alt={editor.template.name}
+						draggable="false"
+						crossorigin="anonymous"
+						class="h-full w-full object-cover"
+						style="filter:{filterMap[editor.effect]}"
+					/>
+				{/if}
+			</div>
 
+			<!-- Layers (overflow allowed for rotation handles) -->
 			{#each editor.imageLayers as layer (layer.id)}
 				<ImageLayerEl
 					{layer}
@@ -212,179 +235,256 @@
 		</div>
 	</div>
 
-	<!-- Right properties panel -->
-	<div class="w-full lg:w-56">
-		{#if selectedText}
-			<div class="flex flex-col gap-2 rounded-lg border p-3 text-sm">
-				<h3 class="font-semibold text-gray-700">Text Properties</h3>
+	<!-- Right: layer list -->
+	<div class="flex w-full flex-col gap-2 lg:w-64">
+		<p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">Layers</p>
 
-				<label class="flex flex-col gap-1">
-					<span class="text-xs text-gray-500">Content</span>
-					<textarea
-						rows="2"
-						value={selectedText.text}
-						oninput={(e) =>
-							editor.updateTextLayer(selectedText!.id, {
-								text: (e.currentTarget as HTMLTextAreaElement).value
-							})}
-						class="rounded border border-gray-300 px-2 py-1 text-sm"
-					></textarea>
-				</label>
-
-				<label class="flex flex-col gap-1">
-					<span class="text-xs text-gray-500">Font size</span>
-					<input
-						type="range"
-						min="12"
-						max="120"
-						value={selectedText.fontSize}
-						oninput={(e) =>
-							editor.updateTextLayer(selectedText!.id, {
-								fontSize: Number((e.currentTarget as HTMLInputElement).value)
-							})}
-					/>
-					<span class="text-xs text-gray-400">{selectedText.fontSize}px</span>
-				</label>
-
-				<label class="flex flex-col gap-1">
-					<span class="text-xs text-gray-500">Font</span>
-					<select
-						value={selectedText.fontFamily}
-						onchange={(e) =>
-							editor.updateTextLayer(selectedText!.id, {
-								fontFamily: (e.currentTarget as HTMLSelectElement).value
-							})}
-						class="rounded border border-gray-300 px-2 py-1 text-sm"
-					>
-						<option value="Impact">Impact</option>
-						<option value="Arial">Arial</option>
-						<option value="Comic Sans MS">Comic Sans</option>
-						<option value="Georgia">Georgia</option>
-						<option value="Helvetica">Helvetica</option>
-						<option value="Times New Roman">Times New Roman</option>
-					</select>
-				</label>
-
-				<div class="flex gap-2">
-					<label class="flex flex-1 flex-col gap-1">
-						<span class="text-xs text-gray-500">Color</span>
-						<input
-							type="color"
-							value={selectedText.color}
-							oninput={(e) =>
-								editor.updateTextLayer(selectedText!.id, {
-									color: (e.currentTarget as HTMLInputElement).value
-								})}
-							class="h-8 w-full cursor-pointer rounded border border-gray-300"
-						/>
-					</label>
-					<label class="flex flex-1 flex-col gap-1">
-						<span class="text-xs text-gray-500">Outline</span>
-						<input
-							type="color"
-							value={selectedText.outlineColor}
-							oninput={(e) =>
-								editor.updateTextLayer(selectedText!.id, {
-									outlineColor: (e.currentTarget as HTMLInputElement).value
-								})}
-							class="h-8 w-full cursor-pointer rounded border border-gray-300"
-						/>
-					</label>
-				</div>
-
-				<label class="flex flex-col gap-1">
-					<span class="text-xs text-gray-500">Outline width</span>
-					<input
-						type="range"
-						min="0"
-						max="10"
-						value={selectedText.outlineWidth}
-						oninput={(e) =>
-							editor.updateTextLayer(selectedText!.id, {
-								outlineWidth: Number((e.currentTarget as HTMLInputElement).value)
-							})}
-					/>
-				</label>
-
-				<div class="flex gap-2">
-					<span class="text-xs text-gray-500">Align</span>
-					{#each ['left', 'center', 'right'] as align}
-						<button
-							onclick={() =>
-								editor.updateTextLayer(selectedText!.id, {
-									align: align as TextLayer['align']
-								})}
-							class="rounded px-2 py-0.5 text-xs {selectedText.align === align
-								? 'bg-indigo-600 text-white'
-								: 'bg-gray-100 text-gray-700'}"
-						>
-							{align[0].toUpperCase()}
-						</button>
-					{/each}
-				</div>
-
-				<div class="flex gap-3">
-					<label class="flex items-center gap-1 text-xs">
-						<input
-							type="checkbox"
-							checked={selectedText.bold}
-							onchange={(e) =>
-								editor.updateTextLayer(selectedText!.id, {
-									bold: (e.currentTarget as HTMLInputElement).checked
-								})}
-						/>
-						Bold
-					</label>
-					<label class="flex items-center gap-1 text-xs">
-						<input
-							type="checkbox"
-							checked={selectedText.italic}
-							onchange={(e) =>
-								editor.updateTextLayer(selectedText!.id, {
-									italic: (e.currentTarget as HTMLInputElement).checked
-								})}
-						/>
-						Italic
-					</label>
-				</div>
-
-				<button
-					onclick={() => editor.removeTextLayer(selectedText!.id)}
-					class="mt-1 rounded bg-red-100 px-2 py-1 text-xs text-red-700 hover:bg-red-200"
-				>
-					Remove layer
-				</button>
-			</div>
-		{:else if selectedImage}
-			<div class="flex flex-col gap-2 rounded-lg border p-3 text-sm">
-				<h3 class="font-semibold text-gray-700">Image Properties</h3>
-
-				<label class="flex flex-col gap-1">
-					<span class="text-xs text-gray-500">Width</span>
-					<input
-						type="range"
-						min="20"
-						max={CANVAS_WIDTH}
-						value={selectedImage.width}
-						oninput={(e) =>
-							editor.updateImageLayer(selectedImage!.id, {
-								width: Number((e.currentTarget as HTMLInputElement).value)
-							})}
-					/>
-					<span class="text-xs text-gray-400">{selectedImage.width}px</span>
-				</label>
-
-				<button
-					onclick={() => editor.removeImageLayer(selectedImage!.id)}
-					class="mt-1 rounded bg-red-100 px-2 py-1 text-xs text-red-700 hover:bg-red-200"
-				>
-					Remove layer
-				</button>
-			</div>
-		{:else}
+		{#if editor.textLayers.length === 0 && editor.imageLayers.length === 0}
 			<div class="rounded-lg border border-dashed p-4 text-center text-xs text-gray-400">
-				Select a layer to edit its properties
+				No layers yet.<br />Add text or an image overlay.
 			</div>
 		{/if}
+
+		{#each editor.textLayers as layer (layer.id)}
+			{@const isSelected = editor.selectedLayerId === layer.id}
+			{@const isExpanded = expandedId === layer.id}
+			<div
+				class="overflow-hidden rounded-lg border {isSelected
+					? 'border-indigo-400'
+					: 'border-gray-200'}"
+			>
+				<!-- Header -->
+				<button
+					onclick={() => toggleLayer(layer.id)}
+					class="flex w-full items-center gap-2 px-3 py-2 text-left {isSelected
+						? 'bg-indigo-50'
+						: 'hover:bg-gray-50'}"
+				>
+					<span
+						class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-indigo-200 text-xs font-bold text-indigo-700"
+						>T</span
+					>
+					<span class="flex-1 truncate text-xs text-gray-700">{layer.text || 'Text'}</span>
+					<span class="text-xs text-gray-400">{isExpanded ? '▲' : '▼'}</span>
+				</button>
+
+				<!-- Properties -->
+				{#if isExpanded}
+					<div class="flex flex-col gap-2 border-t bg-white px-3 py-2">
+						<label class="flex flex-col gap-1">
+							<span class="text-xs text-gray-500">Content</span>
+							<textarea
+								rows="2"
+								value={layer.text}
+								oninput={(e) =>
+									editor.updateTextLayer(layer.id, {
+										text: (e.currentTarget as HTMLTextAreaElement).value
+									})}
+								class="rounded border border-gray-300 px-2 py-1 text-xs"
+							></textarea>
+						</label>
+
+						<label class="flex flex-col gap-1">
+							<span class="text-xs text-gray-500">Font size — {layer.fontSize}px</span>
+							<input
+								type="range"
+								min="12"
+								max="120"
+								value={layer.fontSize}
+								oninput={(e) =>
+									editor.updateTextLayer(layer.id, {
+										fontSize: Number((e.currentTarget as HTMLInputElement).value)
+									})}
+							/>
+						</label>
+
+						<label class="flex flex-col gap-1">
+							<span class="text-xs text-gray-500">Font</span>
+							<select
+								value={layer.fontFamily}
+								onchange={(e) =>
+									editor.updateTextLayer(layer.id, {
+										fontFamily: (e.currentTarget as HTMLSelectElement).value
+									})}
+								class="rounded border border-gray-300 px-2 py-1 text-xs"
+							>
+								<option value="Impact">Impact</option>
+								<option value="Arial">Arial</option>
+								<option value="Comic Sans MS">Comic Sans</option>
+								<option value="Georgia">Georgia</option>
+								<option value="Helvetica">Helvetica</option>
+								<option value="Times New Roman">Times New Roman</option>
+							</select>
+						</label>
+
+						<div class="flex gap-2">
+							<label class="flex flex-1 flex-col gap-1">
+								<span class="text-xs text-gray-500">Color</span>
+								<input
+									type="color"
+									value={layer.color}
+									oninput={(e) =>
+										editor.updateTextLayer(layer.id, {
+											color: (e.currentTarget as HTMLInputElement).value
+										})}
+									class="h-7 w-full cursor-pointer rounded border border-gray-300"
+								/>
+							</label>
+							<label class="flex flex-1 flex-col gap-1">
+								<span class="text-xs text-gray-500">Outline</span>
+								<input
+									type="color"
+									value={layer.outlineColor}
+									oninput={(e) =>
+										editor.updateTextLayer(layer.id, {
+											outlineColor: (e.currentTarget as HTMLInputElement).value
+										})}
+									class="h-7 w-full cursor-pointer rounded border border-gray-300"
+								/>
+							</label>
+						</div>
+
+						<label class="flex flex-col gap-1">
+							<span class="text-xs text-gray-500">Outline width — {layer.outlineWidth}</span>
+							<input
+								type="range"
+								min="0"
+								max="10"
+								value={layer.outlineWidth}
+								oninput={(e) =>
+									editor.updateTextLayer(layer.id, {
+										outlineWidth: Number((e.currentTarget as HTMLInputElement).value)
+									})}
+							/>
+						</label>
+
+						<div class="flex items-center gap-2">
+							<span class="text-xs text-gray-500">Align</span>
+							{#each ['left', 'center', 'right'] as align}
+								<button
+									onclick={() =>
+										editor.updateTextLayer(layer.id, {
+											align: align as TextLayer['align']
+										})}
+									class="rounded px-2 py-0.5 text-xs {layer.align === align
+										? 'bg-indigo-600 text-white'
+										: 'bg-gray-100 text-gray-700'}"
+								>
+									{align[0].toUpperCase()}
+								</button>
+							{/each}
+						</div>
+
+						<label class="flex flex-col gap-1">
+							<span class="text-xs text-gray-500">Rotation — {Math.round(layer.rotation)}°</span>
+							<input
+								type="range"
+								min="-180"
+								max="180"
+								value={Math.round(layer.rotation)}
+								oninput={(e) =>
+									editor.updateTextLayer(layer.id, {
+										rotation: Number((e.currentTarget as HTMLInputElement).value)
+									})}
+							/>
+						</label>
+
+						<div class="flex gap-3">
+							<label class="flex items-center gap-1 text-xs">
+								<input
+									type="checkbox"
+									checked={layer.bold}
+									onchange={(e) =>
+										editor.updateTextLayer(layer.id, {
+											bold: (e.currentTarget as HTMLInputElement).checked
+										})}
+								/>
+								Bold
+							</label>
+							<label class="flex items-center gap-1 text-xs">
+								<input
+									type="checkbox"
+									checked={layer.italic}
+									onchange={(e) =>
+										editor.updateTextLayer(layer.id, {
+											italic: (e.currentTarget as HTMLInputElement).checked
+										})}
+								/>
+								Italic
+							</label>
+						</div>
+
+						<button
+							onclick={() => editor.removeTextLayer(layer.id)}
+							class="rounded bg-red-100 px-2 py-1 text-xs text-red-700 hover:bg-red-200"
+						>
+							Remove layer
+						</button>
+					</div>
+				{/if}
+			</div>
+		{/each}
+
+		{#each editor.imageLayers as layer (layer.id)}
+			{@const isSelected = editor.selectedLayerId === layer.id}
+			{@const isExpanded = expandedId === layer.id}
+			<div
+				class="overflow-hidden rounded-lg border {isSelected
+					? 'border-indigo-400'
+					: 'border-gray-200'}"
+			>
+				<!-- Header -->
+				<button
+					onclick={() => toggleLayer(layer.id)}
+					class="flex w-full items-center gap-2 px-3 py-2 text-left {isSelected
+						? 'bg-indigo-50'
+						: 'hover:bg-gray-50'}"
+				>
+					<img src={layer.src} alt="" class="h-5 w-5 flex-shrink-0 rounded object-cover" />
+					<span class="flex-1 truncate text-xs text-gray-700">Image overlay</span>
+					<span class="text-xs text-gray-400">{isExpanded ? '▲' : '▼'}</span>
+				</button>
+
+				<!-- Properties -->
+				{#if isExpanded}
+					<div class="flex flex-col gap-2 border-t bg-white px-3 py-2">
+						<label class="flex flex-col gap-1">
+							<span class="text-xs text-gray-500">Width — {layer.width}px</span>
+							<input
+								type="range"
+								min="20"
+								max={CANVAS_WIDTH}
+								value={layer.width}
+								oninput={(e) =>
+									editor.updateImageLayer(layer.id, {
+										width: Number((e.currentTarget as HTMLInputElement).value)
+									})}
+							/>
+						</label>
+
+						<label class="flex flex-col gap-1">
+							<span class="text-xs text-gray-500">Rotation — {Math.round(layer.rotation)}°</span>
+							<input
+								type="range"
+								min="-180"
+								max="180"
+								value={Math.round(layer.rotation)}
+								oninput={(e) =>
+									editor.updateImageLayer(layer.id, {
+										rotation: Number((e.currentTarget as HTMLInputElement).value)
+									})}
+							/>
+						</label>
+
+						<button
+							onclick={() => editor.removeImageLayer(layer.id)}
+							class="rounded bg-red-100 px-2 py-1 text-xs text-red-700 hover:bg-red-200"
+						>
+							Remove layer
+						</button>
+					</div>
+				{/if}
+			</div>
+		{/each}
 	</div>
 </div>

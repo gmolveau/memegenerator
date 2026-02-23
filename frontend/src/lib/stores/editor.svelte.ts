@@ -12,6 +12,7 @@ function defaultText(): TextLayer {
 		y: 50,
 		width: 300,
 		height: 60,
+		rotation: 0,
 		fontSize: 36,
 		fontFamily: 'Impact',
 		color: '#ffffff',
@@ -79,7 +80,8 @@ function createEditorState() {
 				x: 20,
 				y: 20,
 				width,
-				height
+				height,
+				rotation: 0
 			};
 			state.imageLayers = [...state.imageLayers, layer];
 			state.selectedLayerId = layer.id;
