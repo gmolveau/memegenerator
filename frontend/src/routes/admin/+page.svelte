@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { fetchTemplates, updateTemplate } from '$lib/api/templates';
 	import type { Template } from '$lib/types';
 
@@ -49,10 +50,8 @@
 	}
 
 	$effect(() => {
-		// Re-fetch whenever page or search changes
-		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-		page;
-		load();
+		page; // track page changes; search changes are handled by the debounced oninput
+		untrack(load);
 	});
 
 	let debounce: ReturnType<typeof setTimeout>;

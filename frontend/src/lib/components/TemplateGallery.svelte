@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { fetchTemplates, uploadTemplate } from '$lib/api/templates';
 	import type { Template } from '$lib/types';
 
@@ -74,7 +75,7 @@
 	}
 
 	$effect(() => {
-		load();
+		untrack(load); // run once on mount; search changes are handled by the debounced oninput
 	});
 
 	let debounce: ReturnType<typeof setTimeout>;
@@ -198,7 +199,7 @@
 			{#each templates as template (template.id)}
 				<button
 					onclick={() => onselect(template)}
-					class="group relative overflow-hidden rounded-lg border-2 border-transparent bg-gray-100 transition hover:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+					class="group overflow-hidden rounded-lg border-2 border-transparent bg-gray-100 transition hover:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
 				>
 					<img
 						src={template.image_url}
@@ -206,11 +207,7 @@
 						loading="lazy"
 						class="aspect-square w-full object-cover"
 					/>
-					<div
-						class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2 opacity-0 transition group-hover:opacity-100"
-					>
-						<p class="truncate text-xs font-medium text-white">{template.name}</p>
-					</div>
+					<p class="truncate px-2 py-1.5 text-xs font-medium text-gray-700">{template.name}</p>
 				</button>
 			{/each}
 		</div>
