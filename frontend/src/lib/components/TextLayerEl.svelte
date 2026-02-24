@@ -148,6 +148,7 @@
 		color: ${layer.color};
 		text-align: ${layer.align};
 		text-shadow: ${textShadow};
+		text-transform: ${layer.allCaps ? 'uppercase' : 'none'};
 		line-height: 1.2;
 		padding: 4px;
 	`);

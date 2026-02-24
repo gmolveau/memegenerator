@@ -239,6 +239,7 @@
 								</div>
 							{:else}
 								<p class="truncate text-sm font-medium text-gray-800">{template.name}</p>
+								<p class="text-xs text-gray-400">#{template.id}</p>
 								{#if template.keywords.length > 0}
 									<div class="mt-1 flex flex-wrap gap-1">
 										{#each template.keywords as kw}

@@ -20,7 +20,8 @@ function defaultText(): TextLayer {
 		outlineWidth: 2,
 		align: 'center',
 		bold: false,
-		italic: false
+		italic: false,
+		allCaps: false
 	};
 }
 

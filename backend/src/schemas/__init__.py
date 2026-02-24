@@ -1,5 +1,5 @@
 """
-web.schemas module.
+Schemas module.
 
-This package contains the pydantic schemas for the web framework (fastapi).
+This package contains the pydantic schemas (request, response) for the web framework (fastapi).
 """

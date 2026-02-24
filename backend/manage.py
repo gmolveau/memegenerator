@@ -1,5 +1,5 @@
 import click
-from src.cli.example import example_group
+from src.cli.templates import templates_group
 
 
 @click.group()
@@ -8,7 +8,7 @@ def all_commands():
 
 
 # Add script handlers here
-all_commands.add_command(example_group)
+all_commands.add_command(templates_group)
 
 
 if __name__ == "__main__":

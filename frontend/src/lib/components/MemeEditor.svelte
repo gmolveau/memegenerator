@@ -111,13 +111,14 @@
 			ctx.fillStyle = layer.color;
 			const tx =
 				layer.align === 'center' ? layer.width / 2 : layer.align === 'right' ? layer.width : 0;
+			const text = layer.allCaps ? layer.text.toUpperCase() : layer.text;
 			if (layer.outlineWidth > 0) {
 				ctx.strokeStyle = layer.outlineColor;
 				ctx.lineWidth = layer.outlineWidth * 2;
 				ctx.lineJoin = 'round';
-				ctx.strokeText(layer.text, tx, layer.fontSize);
+				ctx.strokeText(text, tx, layer.fontSize);
 			}
-			ctx.fillText(layer.text, tx, layer.fontSize);
+			ctx.fillText(text, tx, layer.fontSize);
 			ctx.restore();
 		}
 
@@ -304,6 +305,42 @@
 							></textarea>
 						</label>
 
+						<div class="flex gap-3">
+							<label class="flex items-center gap-1 text-xs">
+								<input
+									type="checkbox"
+									checked={layer.bold}
+									onchange={(e) =>
+										editor.updateTextLayer(layer.id, {
+											bold: (e.currentTarget as HTMLInputElement).checked
+										})}
+								/>
+								Bold
+							</label>
+							<label class="flex items-center gap-1 text-xs">
+								<input
+									type="checkbox"
+									checked={layer.italic}
+									onchange={(e) =>
+										editor.updateTextLayer(layer.id, {
+											italic: (e.currentTarget as HTMLInputElement).checked
+										})}
+								/>
+								Italic
+							</label>
+							<label class="flex items-center gap-1 text-xs">
+								<input
+									type="checkbox"
+									checked={layer.allCaps}
+									onchange={(e) =>
+										editor.updateTextLayer(layer.id, {
+											allCaps: (e.currentTarget as HTMLInputElement).checked
+										})}
+								/>
+								ALL CAPS
+							</label>
+						</div>
+
 						<label class="flex flex-col gap-1">
 							<span class="text-xs text-gray-500">Font size — {layer.fontSize}px</span>
 							<input
@@ -408,31 +445,6 @@
 									})}
 							/>
 						</label>
-
-						<div class="flex gap-3">
-							<label class="flex items-center gap-1 text-xs">
-								<input
-									type="checkbox"
-									checked={layer.bold}
-									onchange={(e) =>
-										editor.updateTextLayer(layer.id, {
-											bold: (e.currentTarget as HTMLInputElement).checked
-										})}
-								/>
-								Bold
-							</label>
-							<label class="flex items-center gap-1 text-xs">
-								<input
-									type="checkbox"
-									checked={layer.italic}
-									onchange={(e) =>
-										editor.updateTextLayer(layer.id, {
-											italic: (e.currentTarget as HTMLInputElement).checked
-										})}
-								/>
-								Italic
-							</label>
-						</div>
 
 						<button
 							onclick={() => editor.removeTextLayer(layer.id)}

@@ -22,6 +22,7 @@ export interface TextLayer {
 	align: 'left' | 'center' | 'right';
 	bold: boolean;
 	italic: boolean;
+	allCaps: boolean;
 }
 
 export interface ImageLayer {
