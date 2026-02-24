@@ -9,11 +9,11 @@ MAKEFLAGS += --no-builtin-rules
 
 .PHONY: install-dev
 install-dev: ## Install development dependencies
-	npm ci
+	pnpm install
 
 .PHONY: upgrade
 upgrade: ## Upgrade all dependencies
-	npm update --loglevel verbose
+	pnpm update --loglevel verbose
 
 ### Application
 

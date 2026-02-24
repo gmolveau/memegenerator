@@ -4,12 +4,14 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Query, UploadFile
 from sqlalchemy.orm import Session
 from src.db.database import get_db
 from src.models.template import Template
-from src.services import templates as template_service
-from src.web.schemas.template import (
+from src.schemas.template import (
     TemplateListResponse,
     TemplateResponse,
     TemplateUpdateRequest,
 )
+from src.services import templates as template_service
+from src.storage import get_disk
+from src.storage.disk import StorageDisk
 
 router = APIRouter(prefix="/templates", tags=["templates"])
 
@@ -20,6 +22,7 @@ def list_templates(
     limit: int = Query(default=40, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(dependency=get_db),
+    disk: StorageDisk = Depends(get_disk),
 ):
     templates, total = template_service.list_templates(
         db, search=search, limit=limit, offset=offset
@@ -29,7 +32,7 @@ def list_templates(
             id=t.id,
             name=t.name,
             keywords=[k for k in t.keywords.split(",") if k],
-            image_url=f"/static/templates/{t.filename}",
+            image_url=disk.url(t.filename),
             created_at=t.created_at,
         )
         for t in templates
@@ -38,7 +41,11 @@ def list_templates(
 
 
 @router.get(path="/{template_id}", response_model=TemplateResponse)
-def get_template(template_id: int, db: Session = Depends(dependency=get_db)):
+def get_template(
+    template_id: int,
+    db: Session = Depends(dependency=get_db),
+    disk: StorageDisk = Depends(get_disk),
+):
     template = template_service.get_template(db, template_id)
     if not template:
         raise HTTPException(status_code=404, detail="Template not found")
@@ -46,7 +53,7 @@ def get_template(template_id: int, db: Session = Depends(dependency=get_db)):
         id=template.id,
         name=template.name,
         keywords=[k for k in template.keywords.split(",") if k],
-        image_url=f"/static/templates/{template.filename}",
+        image_url=disk.url(template.filename),
         created_at=template.created_at,
     )
 
@@ -57,11 +64,12 @@ def upload_template(
     keywords: str = Form(""),
     file: UploadFile = ...,
     db: Session = Depends(get_db),
+    disk: StorageDisk = Depends(get_disk),
 ):
     keyword_list = [k.strip() for k in keywords.split(",") if k.strip()]
     try:
         template: Template = template_service.create_template(
-            db, name, keyword_list, file
+            db, disk, name, keyword_list, file
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -69,7 +77,7 @@ def upload_template(
         id=template.id,
         name=template.name,
         keywords=[k for k in template.keywords.split(sep=",") if k],
-        image_url=f"/static/templates/{template.filename}",
+        image_url=disk.url(template.filename),
         created_at=template.created_at,
     )
 
@@ -79,6 +87,7 @@ def update_template(
     template_id: int,
     body: TemplateUpdateRequest,
     db: Session = Depends(dependency=get_db),
+    disk: StorageDisk = Depends(get_disk),
 ):
     template = template_service.update_template(
         db, template_id, name=body.name, keywords=body.keywords
@@ -89,12 +98,16 @@ def update_template(
         id=template.id,
         name=template.name,
         keywords=[k for k in template.keywords.split(",") if k],
-        image_url=f"/static/templates/{template.filename}",
+        image_url=disk.url(template.filename),
         created_at=template.created_at,
     )
 
 
 @router.delete(path="/{template_id}", status_code=204)
-def delete_template(template_id: int, db: Session = Depends(dependency=get_db)):
-    if not template_service.delete_template(db, template_id):
+def delete_template(
+    template_id: int,
+    db: Session = Depends(dependency=get_db),
+    disk: StorageDisk = Depends(get_disk),
+):
+    if not template_service.delete_template(db, disk, template_id):
         raise HTTPException(status_code=404, detail="Template not found")

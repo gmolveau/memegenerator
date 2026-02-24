@@ -109,8 +109,10 @@ def seed(db) -> None:
 
 
 def cleanup(db) -> None:
-    deleted = db.query(Template).filter(Template.filename.like("stress_%")).delete(
-        synchronize_session=False
+    deleted = (
+        db.query(Template)
+        .filter(Template.filename.like("stress_%"))
+        .delete(synchronize_session=False)
     )
     db.commit()
 

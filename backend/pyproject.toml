@@ -4,7 +4,11 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["alembic>=1.18.4", "fastapi[standard]>=0.129.0"]
+dependencies = [
+    "alembic>=1.18.4",
+    "boto3>=1.42.55",
+    "fastapi[standard]>=0.129.0",
+]
 
 [dependency-groups]
 dev = ["bandit>=1.9.3", "ruff>=0.15.1", "ty>=0.0.17"]

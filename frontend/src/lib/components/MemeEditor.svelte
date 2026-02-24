@@ -139,6 +139,26 @@
 		editor.selectLayer(id);
 		expandedId = expandedId === id ? null : id;
 	}
+
+	// Delete selected layer with the Delete key.
+	// Skips when an input/textarea/select has focus (e.g. inline text editing, panel fields).
+	$effect(() => {
+		function onKeyDown(e: KeyboardEvent) {
+			if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+			const tag = (document.activeElement as HTMLElement)?.tagName;
+			if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+			const id = editor.selectedLayerId;
+			if (!id) return;
+			e.preventDefault();
+			if (editor.textLayers.some((l) => l.id === id)) {
+				editor.removeTextLayer(id);
+			} else {
+				editor.removeImageLayer(id);
+			}
+		}
+		window.addEventListener('keydown', onKeyDown);
+		return () => window.removeEventListener('keydown', onKeyDown);
+	});
 </script>
 
 <div class="flex flex-col gap-4 lg:flex-row">

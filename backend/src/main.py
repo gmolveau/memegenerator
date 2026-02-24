@@ -8,12 +8,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.staticfiles import StaticFiles
 from src.db.database import ensure_data_dir
-from src.web.endpoints.templates import router as templates_router
+from src.routes.templates import router as templates_router
+from src.storage import active_disk
+from src.storage.local import LocalDisk
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     ensure_data_dir()
+    active_disk.ensure()
     yield
 
 
@@ -39,7 +42,9 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(router=templates_router, prefix="/api")
-    app.mount(path="/static", app=StaticFiles(directory="data"), name="static")
+
+    if isinstance(active_disk, LocalDisk):
+        app.mount(path="/static", app=StaticFiles(directory="data"), name="static")
 
     return app
 

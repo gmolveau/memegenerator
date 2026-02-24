@@ -167,7 +167,6 @@
 	onpointermove={onPointerMove}
 	onpointerup={onPointerUp}
 	ondblclick={startEditing}
-	onkeydown={(e) => e.key === 'Delete' && !editing && onremove()}
 >
 	{#if editing}
 		<textarea

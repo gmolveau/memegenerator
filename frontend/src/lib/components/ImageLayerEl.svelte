@@ -112,7 +112,6 @@
 	onpointerdown={onPointerDown}
 	onpointermove={onPointerMove}
 	onpointerup={onPointerUp}
-	onkeydown={(e) => e.key === 'Delete' && onremove()}
 >
 	<img
 		src={layer.src}
