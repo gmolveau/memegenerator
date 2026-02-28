@@ -10,6 +10,7 @@ class TemplateResponse(BaseModel):
     name: str
     keywords: list[str]
     image_url: str
+    popularity: int
     created_at: datetime
 
     model_config = {"from_attributes": True}

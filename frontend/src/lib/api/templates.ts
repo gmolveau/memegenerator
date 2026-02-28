@@ -23,6 +23,10 @@ export async function fetchTemplates(
 	};
 }
 
+export async function incrementPopularity(id: number): Promise<void> {
+	await fetch(`${BASE}/api/templates/${id}/popularity`, { method: 'POST' });
+}
+
 export async function updateTemplate(
 	id: number,
 	name: string,

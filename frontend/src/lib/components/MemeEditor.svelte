@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { editor } from '$lib/stores/editor.svelte';
+	import { incrementPopularity } from '$lib/api/templates';
 	import type { Effect, ImageLayer, TextLayer } from '$lib/types';
 	import TextLayerEl from './TextLayerEl.svelte';
 	import ImageLayerEl from './ImageLayerEl.svelte';
@@ -126,6 +127,10 @@
 		link.download = 'meme.jpg';
 		link.href = canvas.toDataURL('image/jpeg', 0.92);
 		link.click();
+
+		if (editor.template) {
+			incrementPopularity(editor.template.id).catch(() => {});
+		}
 	}
 
 	// --- Layer list panel ---

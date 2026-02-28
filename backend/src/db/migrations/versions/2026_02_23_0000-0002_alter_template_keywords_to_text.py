@@ -17,21 +17,21 @@ depends_on = None
 
 def upgrade() -> None:
     """Apply the migration."""
-    op.alter_column(
-        "templates",
-        "keywords",
-        type_=sa.Text,
-        existing_nullable=False,
-        existing_server_default="",
-    )
+    with op.batch_alter_table("templates") as batch_op:
+        batch_op.alter_column(
+            "keywords",
+            type_=sa.Text,
+            existing_nullable=False,
+            existing_server_default="",
+        )
 
 
 def downgrade() -> None:
     """Reverse the migration."""
-    op.alter_column(
-        "templates",
-        "keywords",
-        type_=sa.String(1000),
-        existing_nullable=False,
-        existing_server_default="",
-    )
+    with op.batch_alter_table("templates") as batch_op:
+        batch_op.alter_column(
+            "keywords",
+            type_=sa.String(1000),
+            existing_nullable=False,
+            existing_server_default="",
+        )

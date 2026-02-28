@@ -33,7 +33,7 @@ def list_templates(
     rows = (
         db.query(Template, total_col)
         .filter(*filters)
-        .order_by(Template.created_at.desc())
+        .order_by(Template.popularity.desc(), Template.created_at.desc())
         .offset(offset)
         .limit(limit)
         .all()
@@ -82,6 +82,15 @@ def update_template(
     db.commit()
     db.refresh(template)
     return template
+
+
+def increment_popularity(db: Session, template_id: int) -> bool:
+    template = get_template(db, template_id)
+    if not template:
+        return False
+    template.popularity += 1
+    db.commit()
+    return True
 
 
 def delete_template(db: Session, disk: StorageDisk, template_id: int) -> bool:
