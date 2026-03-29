@@ -7,6 +7,7 @@ from fastapi import UploadFile
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from src.exceptions import TemplateNotFound
 from src.models import Template
 from src.storage.disk import StorageDisk
 
@@ -107,10 +108,10 @@ def update_template(
     name: str,
     keywords: list[str],
     text_layers: list[dict] | None = None,
-) -> Template | None:
+) -> Template:
     template = get_template(db, template_id)
-    if not template:
-        return None
+    if template is None:
+        raise TemplateNotFound()
     template.name = name
     template.keywords = ",".join(k.strip() for k in keywords if k.strip())
     if text_layers is not None:

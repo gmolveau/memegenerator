@@ -33,14 +33,14 @@ ruff:
     uv run ruff check . --fix
 
 ruff-check:
-    uv run ruff check src tests cli migrations
-    uv run ruff format --check src src tests cli migrations
+    uv run ruff check src
+    uv run ruff format --check src
 
 ty:
-    uv run ty check src tests cli migrations
+    uv run ty check
 
 bandit:
-    uv run bandit -c pyproject.toml -r src
+    uv run bandit --silent -c pyproject.toml -r src
 
 alembic-check:
     uv run alembic -c src/migrations/alembic.ini check

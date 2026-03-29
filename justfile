@@ -45,14 +45,18 @@ localprod-clean:
 ### versioning
 
 bump-version bump:
-    cd backend && uv version --bump {{bump}}
-    npm --prefix frontend version {{bump}} --no-git-tag-version
+    cd backend && uv version --bump {{ bump }}
+    npm --prefix frontend version {{ bump }} --no-git-tag-version
 
 ### misc
 
 install-dev:
     cd backend && just install-dev
     cd frontend && just install-dev
+
+checks:
+    cd backend && just checks
+    cd frontend && just checks
 
 format:
     cd backend && just format

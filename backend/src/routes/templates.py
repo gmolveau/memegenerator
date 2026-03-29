@@ -4,9 +4,15 @@ import json
 from typing import Annotated
 
 from fastapi import APIRouter, Form, HTTPException, Query, UploadFile
-from starlette.requests import Request
 
-from src.dependencies import ADMIN_ROLES, AdminDep, CurrentUserDep, DiskDep, SessionDep
+from src.dependencies import (
+    ADMIN_ROLES,
+    AdminDep,
+    AuthUserDep,
+    CurrentUserDep,
+    DiskDep,
+    SessionDep,
+)
 from src.models import Template
 from src.schemas.template import (
     TemplateListResponse,
@@ -58,12 +64,10 @@ def list_templates(
 def list_my_templates(
     db: SessionDep,
     disk: DiskDep,
-    current_user: CurrentUserDep,
+    current_user: AuthUserDep,
     limit: Annotated[int, Query(ge=1, le=100)] = 40,
     offset: Annotated[int, Query(ge=0)] = 0,
 ):
-    if not current_user:
-        raise HTTPException(status_code=401, detail="Not authenticated")
     templates, total = template_service.list_templates_by_creator(
         db, current_user.id, limit=limit, offset=offset
     )
@@ -111,23 +115,18 @@ def upload_template(
 
 @router.patch(path="/{template_id}", response_model=TemplateResponse)
 def update_template(
-    request: Request,
     db: SessionDep,
     disk: DiskDep,
-    current_user: CurrentUserDep,
+    current_user: AuthUserDep,
     template_id: int,
     body: TemplateUpdateRequest,
 ):
-    session_user = request.session.get("user")
-    if not session_user:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-
     template = template_service.get_template(db, template_id)
     if not template:
         raise HTTPException(status_code=404, detail="Template not found")
 
-    is_admin = session_user.get("role") in ADMIN_ROLES
-    is_creator = current_user is not None and template.creator_id == current_user.id
+    is_admin = current_user.role is not None and current_user.role.name in ADMIN_ROLES
+    is_creator = template.creator_id == current_user.id
     if not is_admin and not is_creator:
         raise HTTPException(status_code=403, detail="Forbidden")
 
@@ -140,7 +139,6 @@ def update_template(
         if body.text_layers is not None
         else None,
     )
-    assert updated is not None
     return _to_response(updated, disk)
 
 

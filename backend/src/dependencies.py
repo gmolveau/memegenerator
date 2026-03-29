@@ -32,6 +32,16 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User | 
 CurrentUserDep = Annotated[User | None, Depends(get_current_user)]
 
 
+def require_current_user(user: CurrentUserDep) -> User:
+    """Raise 401 if the user is not authenticated."""
+    if user is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return user
+
+
+AuthUserDep = Annotated[User, Depends(require_current_user)]
+
+
 def require_admin(request: Request) -> None:
     """Raise 401 if not logged in, 403 if not an admin."""
     user = request.session.get("user")

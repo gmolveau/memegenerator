@@ -33,3 +33,7 @@ lint.select = [
     "SLF",  # Private members accessed
     "RET",  # Checks return values
 ]
+
+[tool.ty.src]
+include = ["src", "tests"]
+exclude = [".venv"]
