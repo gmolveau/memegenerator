@@ -7,7 +7,8 @@ default:
 build:
     pnpm run build
 
-install-prod: install-dev
+install-prod:
+    pnpm install --prod --frozen-lockfile
 
 install-dev:
     pnpm install --frozen-lockfile
