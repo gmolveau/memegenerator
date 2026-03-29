@@ -13,8 +13,12 @@
   "[shellscript]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"
   },
-  "[vue][javascript][typescript][jsonc][css][html][json]": {
+  "[vue][javascript][typescript][jsonc][css][html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.codeActionsOnSave": {}
   },
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit",
@@ -29,6 +33,7 @@
   "eslint.enable": true,
   "eslint.useFlatConfig": true,
   "eslint.workingDirectories": ["frontend"],
+  "eslint.nodePath": "frontend/node_modules",
   "files.associations": {
     "*.env": "shellscript",
     "*.css": "tailwindcss"
@@ -37,7 +42,7 @@
   "prettier.enable": true,
   "python.defaultInterpreterPath": "backend/.venv/bin/python",
   "python.languageServer": "Default",
-  "python.terminal.activateEnvironment": true,
+  "python.terminal.activateEnvironment": false,
   "python.testing.pytestArgs": ["tests"],
   "python.testing.pytestEnabled": true,
   "python.testing.pytestPath": "FLASK_ENV=test uv run pytest",

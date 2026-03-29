@@ -101,7 +101,9 @@
 		>
 			{#if uploadFile}
 				<span class="text-2xl">🖼️</span>
-				<span class="max-w-full truncate text-xs font-medium text-indigo-700">{uploadFile.name}</span>
+				<span class="max-w-full truncate text-xs font-medium text-indigo-700"
+					>{uploadFile.name}</span
+				>
 				<span class="text-xs text-gray-400">{(uploadFile.size / 1024).toFixed(0)} KB</span>
 			{:else}
 				<span class="text-2xl text-gray-400">↑</span>

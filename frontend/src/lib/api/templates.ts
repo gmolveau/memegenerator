@@ -1,30 +1,31 @@
+import { API_URL, apiFetch } from '$lib/api/client';
 import type { Template } from '$lib/types';
 
-const BASE = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8000';
+function normalizeUrl(url: string): string {
+	return url.startsWith('http') ? url : `${API_URL}${url}`;
+}
+
+function toTemplate(t: Template): Template {
+	return { ...t, image_url: normalizeUrl(t.image_url) };
+}
 
 export async function fetchTemplates(
 	search?: string,
 	limit = 40,
 	offset = 0
 ): Promise<{ templates: Template[]; total: number }> {
-	const url = new URL(`${BASE}/api/templates`);
+	const url = new URL(`${API_URL}/templates`);
 	if (search) url.searchParams.set('search', search);
 	url.searchParams.set('limit', String(limit));
 	url.searchParams.set('offset', String(offset));
 	const res = await fetch(url.toString());
 	if (!res.ok) throw new Error(`Failed to fetch templates: ${res.status}`);
 	const data = await res.json();
-	return {
-		templates: data.templates.map((t: Template) => ({
-			...t,
-			image_url: t.image_url.startsWith('http') ? t.image_url : `${BASE}${t.image_url}`
-		})),
-		total: data.total
-	};
+	return { templates: data.templates.map(toTemplate), total: data.total };
 }
 
 export async function incrementPopularity(id: number): Promise<void> {
-	await fetch(`${BASE}/api/templates/${id}/popularity`, { method: 'POST' });
+	await apiFetch(`/templates/${id}/popularity`, { method: 'POST' });
 }
 
 export async function updateTemplate(
@@ -32,17 +33,23 @@ export async function updateTemplate(
 	name: string,
 	keywords: string[]
 ): Promise<Template> {
-	const res = await fetch(`${BASE}/api/templates/${id}`, {
+	const res = await apiFetch(`/templates/${id}`, {
 		method: 'PATCH',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ name, keywords })
 	});
 	if (!res.ok) throw new Error(`Update failed: ${res.status}`);
-	const t: Template = await res.json();
-	return {
-		...t,
-		image_url: t.image_url.startsWith('http') ? t.image_url : `${BASE}${t.image_url}`
-	};
+	return toTemplate(await res.json());
+}
+
+export async function fetchMyTemplates(
+	limit = 40,
+	offset = 0
+): Promise<{ templates: Template[]; total: number }> {
+	const res = await apiFetch(`/templates/mine?limit=${limit}&offset=${offset}`);
+	if (!res.ok) throw new Error(`Failed to fetch templates: ${res.status}`);
+	const data = await res.json();
+	return { templates: data.templates.map(toTemplate), total: data.total };
 }
 
 export async function uploadTemplate(
@@ -54,11 +61,7 @@ export async function uploadTemplate(
 	form.append('name', name);
 	form.append('keywords', keywords.join(','));
 	form.append('file', file);
-	const res = await fetch(`${BASE}/api/templates`, { method: 'POST', body: form });
+	const res = await apiFetch('/templates', { method: 'POST', body: form });
 	if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
-	const t: Template = await res.json();
-	return {
-		...t,
-		image_url: t.image_url.startsWith('http') ? t.image_url : `${BASE}${t.image_url}`
-	};
+	return toTemplate(await res.json());
 }

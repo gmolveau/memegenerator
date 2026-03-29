@@ -1,7 +1,7 @@
 """SQLite database engine and session factory."""
 
 import os
-from pathlib import Path
+from typing import Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -14,21 +14,17 @@ database_engine = create_engine(
 )
 
 SessionLocal: sessionmaker[Session] = sessionmaker(
+    expire_on_commit=False,
     autocommit=False,
-    autoflush=False,
+    autoflush=True,
     bind=database_engine,
 )
 
 
-def get_db() -> Session:
+def get_db() -> Generator[Session, None, None]:
     """Dependency that yields a database session."""
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
-
-
-def ensure_data_dir() -> None:
-    """Create the data directories if they don't exist."""
-    Path("data/templates").mkdir(parents=True, exist_ok=True)

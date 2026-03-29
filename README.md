@@ -61,17 +61,25 @@ npm install -g pnpm
 
 </details>
 
-- Open two terminals :
+- In terminal 1 :
 
 ```bash
 cd backend
-make install-dev
-make migrate
-make run-dev
+just install-dev
+just migrate
+just run-dev
 ```
+
+- In terminal 2 :
 
 ```bash
 cd frontend
-make install-dev
-make run-dev
+just install-dev
+just run-dev
+```
+
+- In terminal 3 :
+
+```bash
+just run-keycloak
 ```

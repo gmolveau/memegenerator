@@ -17,8 +17,7 @@
 			<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
 				<h1 class="text-xl font-bold tracking-tight text-indigo-700">Meme Generator</h1>
 				<div class="flex items-center gap-3">
-					<span class="text-sm text-gray-500"
-						>Editing: <strong>{editor.template.name}</strong></span
+					<span class="text-sm text-gray-500">Editing: <strong>{editor.template.name}</strong></span
 					>
 					<a
 						href="/"

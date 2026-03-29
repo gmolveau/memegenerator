@@ -1,8 +1,9 @@
 from logging.config import fileConfig
 
 from alembic import context
-from src.db.database import database_engine
-from src.models import DBBaseModel
+
+from src.database import database_engine
+from src.models import BaseModel
 
 config = context.config
 
@@ -23,7 +24,7 @@ config.set_main_option("sqlalchemy.url", get_engine_url())
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-target_metadata = DBBaseModel.metadata
+target_metadata = BaseModel.metadata
 
 
 def run_migrations_offline() -> None:

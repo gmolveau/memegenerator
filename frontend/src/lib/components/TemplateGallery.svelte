@@ -6,21 +6,42 @@
 
 	interface Props {
 		onselect: (template: Template) => void;
+		authenticated?: boolean;
 	}
 
-	let { onselect }: Props = $props();
+	let { onselect, authenticated = false }: Props = $props();
+
+	const PAGE_SIZE = 40;
 
 	let search = $state('');
 	let templates = $state<Template[]>([]);
+	let total = $state(0);
+	let page = $state(0);
 	let loading = $state(false);
 	let error = $state('');
 	let showUpload = $state(false);
+
+	const totalPages = $derived(Math.ceil(total / PAGE_SIZE));
+
+	const pageWindow = $derived((): (number | '…')[] => {
+		if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i);
+		const pages: (number | '…')[] = [];
+		const addPage = (i: number) => {
+			if (pages.at(-1) !== i) pages.push(i);
+		};
+		addPage(0);
+		if (page > 3) pages.push('…');
+		for (let i = Math.max(1, page - 2); i <= Math.min(totalPages - 2, page + 2); i++) addPage(i);
+		if (page < totalPages - 4) pages.push('…');
+		addPage(totalPages - 1);
+		return pages;
+	});
 
 	async function load() {
 		loading = true;
 		error = '';
 		try {
-			({ templates } = await fetchTemplates(search || undefined));
+			({ templates, total } = await fetchTemplates(search || undefined, PAGE_SIZE, page * PAGE_SIZE));
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load templates';
 		} finally {
@@ -29,13 +50,19 @@
 	}
 
 	$effect(() => {
-		untrack(load); // run once on mount; search changes are handled by the debounced oninput
+		page; // track page changes; search changes are handled by the debounced oninput
+		untrack(load);
 	});
 
 	let debounce: ReturnType<typeof setTimeout>;
 	function onSearchInput() {
+		page = 0;
 		clearTimeout(debounce);
 		debounce = setTimeout(load, 300);
+	}
+
+	function goToPage(p: number) {
+		page = p;
 	}
 
 	function onUploaded(template: Template) {
@@ -54,12 +81,14 @@
 			oninput={onSearchInput}
 			class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
 		/>
-		<button
-			onclick={() => (showUpload = !showUpload)}
-			class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-		>
-			{showUpload ? 'Cancel' : '+ Upload'}
-		</button>
+		{#if authenticated}
+			<button
+				onclick={() => (showUpload = !showUpload)}
+				class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+			>
+				{showUpload ? 'Cancel' : '+ Upload'}
+			</button>
+		{/if}
 	</div>
 
 	{#if showUpload}
@@ -99,5 +128,40 @@
 				</button>
 			{/each}
 		</div>
+
+		{#if totalPages > 1}
+			<div class="mt-4 flex flex-wrap items-center justify-center gap-1">
+				<button
+					onclick={() => goToPage(page - 1)}
+					disabled={page === 0}
+					class="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+				>
+					← Prev
+				</button>
+
+				{#each pageWindow() as p}
+					{#if p === '…'}
+						<span class="px-1 text-sm text-gray-400">…</span>
+					{:else}
+						<button
+							onclick={() => goToPage(p)}
+							class="rounded border px-3 py-1.5 text-sm {p === page
+								? 'border-indigo-500 bg-indigo-600 text-white'
+								: 'border-gray-300 text-gray-600 hover:bg-gray-50'}"
+						>
+							{p + 1}
+						</button>
+					{/if}
+				{/each}
+
+				<button
+					onclick={() => goToPage(page + 1)}
+					disabled={page >= totalPages - 1}
+					class="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+				>
+					Next →
+				</button>
+			</div>
+		{/if}
 	{/if}
 </div>

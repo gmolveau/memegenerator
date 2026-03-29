@@ -3,11 +3,12 @@
 ## Frontend
 
 Configured via a `.env` file at `frontend/`.
-Variables must be prefixed with `PUBLIC_` to be exposed to the browser (SvelteKit / Vite convention).
+Variables must be prefixed with `VITE_` to be exposed to the browser (SvelteKit / Vite convention).
 
-| Variable         | Default                 | Description                                                        |
-| ---------------- | ----------------------- | ------------------------------------------------------------------ |
-| `PUBLIC_API_URL` | `http://localhost:8000` | Base URL of the backend API. Used to build all API and image URLs. |
+| Variable          | Default                 | Description                                                        |
+| ----------------- | ----------------------- | ------------------------------------------------------------------ |
+| `PUBLIC_API_URL`  | `http://localhost:8000` | Base URL of the backend API. Used to build all API and image URLs. |
+| `PUBLIC_BASE_URL` | `http://localhost:5173` | Public URL of the frontend. Used to build the post-login redirect. |
 
 ---
 
@@ -17,10 +18,40 @@ Configured via a `.env` file at the repo root (e.g. copy `.env.dev.example`).
 
 ### Security / CORS
 
-| Variable          | Default                    | Description                                                                     |
-| ----------------- | -------------------------- | ------------------------------------------------------------------------------- |
-| `ALLOWED_HOSTS`   | `localhost:5173,localhost` | Comma-separated list of allowed `Host` header values (`TrustedHostMiddleware`). |
-| `ALLOWED_ORIGINS` | `http://localhost:5173`    | Comma-separated list of origins allowed by CORS.                                |
+| Variable          | Default | Description                                                                     |
+| ----------------- | ------- | ------------------------------------------------------------------------------- |
+| `ALLOWED_HOSTS`   | —       | Comma-separated list of allowed `Host` header values (`TrustedHostMiddleware`). |
+| `ALLOWED_ORIGINS` | —       | Comma-separated list of origins allowed by CORS.                                |
+
+### Authentication (Keycloak / OIDC)
+
+| Variable                    | Default | Required | Description                                        |
+| --------------------------- | ------- | -------- | -------------------------------------------------- |
+| `KEYCLOAK_CLIENT_ID`        | —       | **Yes**  | OAuth2 client ID registered in Keycloak.           |
+| `KEYCLOAK_CLIENT_SECRET`    | —       | **Yes**  | OAuth2 client secret.                              |
+| `KEYCLOAK_AUTHORIZE_URL`    | —       | **Yes**  | Keycloak authorization endpoint URL.               |
+| `KEYCLOAK_ACCESS_TOKEN_URL` | —       | **Yes**  | Keycloak token endpoint URL.                       |
+| `KEYCLOAK_JWT_URL`          | —       | **Yes**  | Keycloak JWKS endpoint URL (for token validation). |
+
+### Session
+
+| Variable                     | Default | Required | Description                                                   |
+| ---------------------------- | ------- | -------- | ------------------------------------------------------------- |
+| `SESSION_SECRET_KEY`         | —       | **Yes**  | Secret used to sign the session cookie (use a random string). |
+| `SESSION_COOKIE_BASE_DOMAIN` | —       | **Yes**  | Domain the session cookie is scoped to (e.g. `localhost`).    |
+| `SESSION_COOKIE_MAX_AGE`     | —       | **Yes**  | Session cookie lifetime in seconds (e.g. `86400` = 24 h).     |
+
+### Environment
+
+| Variable  | Default | Description                                                                                                                                            |
+| --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `APP_ENV` | `dev`   | Runtime environment. Accepted values: `dev`, `prod`, `test`. Affects security behaviour (e.g. cross-origin login redirects are only allowed in `dev`). |
+
+### Rate Limiting
+
+| Variable     | Default     | Description                                                                        |
+| ------------ | ----------- | ---------------------------------------------------------------------------------- |
+| `RATE_LIMIT` | `60/minute` | Global rate limit applied to all endpoints. Format: `N/second\|minute\|hour\|day`. |
 
 ### Database
 
@@ -38,7 +69,7 @@ Configured via a `.env` file at the repo root (e.g. copy `.env.dev.example`).
 
 | Variable                 | Default             | Description                                                     |
 | ------------------------ | ------------------- | --------------------------------------------------------------- |
-| `STORAGE_LOCAL_PATH`     | `data/templates`    | Filesystem directory where uploaded template images are stored. |
+| `STORAGE_LOCAL_PATH`     | `static/templates`  | Filesystem directory where uploaded template images are stored. |
 | `STORAGE_LOCAL_BASE_URL` | `/static/templates` | URL prefix used to build public image URLs.                     |
 
 #### S3 driver (`STORAGE_DRIVER=s3`)

@@ -6,7 +6,7 @@ A fullstack meme generator. Users browse a library of image templates, compose t
 
 ---
 
-## Repository layout
+## Repo layout
 
 ```console
 meme-generator/
@@ -41,33 +41,59 @@ meme-generator/
 make install-dev
 
 # Copy and configure environment files
-cp .env.dev.example .env          # backend — edit as needed
-cp frontend/.env.example frontend/.env  # frontend — if it exists
+cp .env.dev.example .env
+ln -s "${PWD}/.env" "${PWD}/backend/.env"  # only for local development
+ln -s "${PWD}/.env" "${PWD}/frontend/.env"  # only for local development
 ```
 
 See [`docs/env.md`](env.md) for every available variable and its default value.
 
 ### Running locally
 
-Open two terminals.
+#### Without docker compose
+
+Edit the keycloak URL in the `.env` file and replace `http://keycloak.localhost` by `http://localhost:8080`
+
+Open 3 terminals.
 
 **Backend** (port 8000)
 
 ```bash
 cd backend
-make migrate       # apply any pending DB migrations (first run + after pulling changes)
-make run-dev       # uvicorn with --reload
+just migrate       # apply any pending DB migrations (first run + after pulling changes)
+just run-dev       # uvicorn with --reload
 ```
 
 **Frontend** (port 5173)
 
 ```bash
 cd frontend
-make run-dev       # Vite dev server
+just run-dev       # Vite dev server
+```
+
+**Keycloak** (port 8080)
+
+```bash
+just run-keycloak      # keycloak instance
 ```
 
 The app is then available at <http://localhost:5173>.
+
 Interactive API docs: <http://localhost:8000/docs>.
+
+Keycloak is available at <http://localhost:8080>.
+
+#### With docker compose
+
+```bash
+just dev-up
+```
+
+The app is then available at <http://app.localhost>.
+
+Interactive API docs: <http://app.localhost/api/docs>.
+
+Keycloak is available at <http://keycloak.localhost>.
 
 ---
 
@@ -111,8 +137,7 @@ backend/src/
 ├── db/
 │   ├── database.py      # Engine, session factory, get_db() dependency
 │   └── migrations/      # Alembic env + versioned migration scripts
-├── models/
-│   └── template.py      # SQLAlchemy ORM model
+├── models.py              # SQLAlchemy ORM models
 ├── schemas/
 │   └── template.py      # Pydantic request / response schemas
 ├── services/

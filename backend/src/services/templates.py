@@ -5,7 +5,8 @@ import uuid
 from fastapi import UploadFile
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from src.models.template import Template
+
+from src.models import Template
 from src.storage.disk import StorageDisk
 
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
@@ -43,12 +44,37 @@ def list_templates(
     return [r for r, _ in rows], rows[0].total
 
 
+def list_templates_by_creator(
+    db: Session,
+    creator_id: int,
+    limit: int = 40,
+    offset: int = 0,
+) -> tuple[list[Template], int]:
+    total_col = func.count().over().label("total")
+    rows = (
+        db.query(Template, total_col)
+        .filter(Template.creator_id == creator_id)
+        .order_by(Template.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    if not rows:
+        return [], 0
+    return [r for r, _ in rows], rows[0].total
+
+
 def get_template(db: Session, template_id: int) -> Template | None:
     return db.query(Template).filter(Template.id == template_id).first()
 
 
 def create_template(
-    db: Session, disk: StorageDisk, name: str, keywords: list[str], file: UploadFile
+    db: Session,
+    disk: StorageDisk,
+    name: str,
+    keywords: list[str],
+    file: UploadFile,
+    creator_id: int | None = None,
 ) -> Template:
     if file.content_type not in ALLOWED_CONTENT_TYPES:
         raise ValueError(f"Unsupported file type: {file.content_type}")
@@ -61,6 +87,7 @@ def create_template(
         name=name,
         filename=filename,
         keywords=",".join(k.strip() for k in keywords if k.strip()),
+        creator_id=creator_id,
     )
     db.add(template)
     db.commit()

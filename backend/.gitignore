@@ -5,4 +5,7 @@ __pycache__
 coverage.xml
 .report/
 .ruff_cache/
+!data/.gitignore
 data/
+!static/templates/.gitignore
+static/
