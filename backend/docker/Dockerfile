@@ -21,6 +21,8 @@ COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --dev
 
+EXPOSE 8000
+
 CMD ["just", "run-dev"]
 
 FROM base AS prod
@@ -39,5 +41,7 @@ COPY . /app
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev
+
+EXPOSE 8000
 
 CMD ["just", "run-prod"]

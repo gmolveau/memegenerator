@@ -23,25 +23,27 @@ services:
           - keycloak.localhost
 
   migrate:
-    build:
-      dockerfile: ./docker/Dockerfile
-      context: ./backend
-      target: prod
-    image: memegenerator/backend:prod
+    # build:
+    #   dockerfile: ./docker/Dockerfile
+    #   context: ./backend
+    #   target: prod
+    # image: memegenerator/backend:prod
+    image: ghcr.io/gmolveau/memegenerator/backend:0.1.1
     command: just migrate
     restart: "no"
     env_file: ".env"
     volumes:
-      - ${DATA_FOLDER:?}:/app/data
+      - app_data:/app/data
 
   backend:
-    build:
-      dockerfile: ./docker/Dockerfile
-      context: ./backend
-      target: prod
-      args:
-        APP_VERSION: localprod
-    image: memegenerator/backend:prod
+    # build:
+    #   dockerfile: ./docker/Dockerfile
+    #   context: ./backend
+    #   target: prod
+    #   args:
+    #     APP_VERSION: localprod
+    # image: memegenerator/backend:prod
+    image: ghcr.io/gmolveau/memegenerator/backend:0.1.1
     healthcheck:
       test:
         [
@@ -71,17 +73,18 @@ services:
       - public-network
     env_file: ".env"
     volumes:
-      - ${DATA_FOLDER:?}:/app/data
-      - ${STATIC_FOLDER:?}:/app/static
+      - app_data:/app/data
+      - app_static:/app/static
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: ./docker/Dockerfile
-      target: prod
-      args:
-        APP_VERSION: localprod
-    image: memegenerator/frontend:prod
+    # build:
+    #   context: ./frontend
+    #   dockerfile: ./docker/Dockerfile
+    #   target: prod
+    #   args:
+    #     APP_VERSION: localprod
+    # image: memegenerator/frontend:prod
+    image: ghcr.io/gmolveau/memegenerator/frontend:0.1.1
     labels:
       traefik.enable: "true"
       traefik.docker.network: public-network
@@ -119,3 +122,5 @@ networks:
 
 volumes:
   keycloak-data:
+  app_data:
+  app_static:

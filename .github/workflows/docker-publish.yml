@@ -48,6 +48,7 @@ jobs:
           file: ./backend/docker/Dockerfile
           target: prod
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: APP_VERSION=${{ github.ref_name }}
@@ -91,6 +92,7 @@ jobs:
           file: ./frontend/docker/Dockerfile
           target: prod
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: APP_VERSION=${{ github.ref_name }}
