@@ -4,10 +4,14 @@ set dotenv-load := true
 default:
     @just --list
 
+init-env:
+    [ -f .env ] || cp .env.dev.example .env
+    [ -L backend/.env ] || ln -s "${PWD}/.env" "${PWD}/backend/.env"
+    [ -L frontend/.env ] || ln -s "${PWD}/.env" "${PWD}/frontend/.env"
+
 ### docker compose dev stack
 
-dev-up:
-    [ -f .env ] || cp .env.dev.example .env
+dev-up: init-env
     docker compose build --pull
     docker compose watch
 
@@ -23,7 +27,7 @@ dev-backend-shell:
 ### local dev stack
 
 run-keycloak:
-    docker run --rm -p 8080:8080 -e KEYCLOAK_ADMIN=keycloak -e KEYCLOAK_ADMIN_PASSWORD=keycloak -v ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json quay.io/keycloak/keycloak:24.0.0 start-dev --import-realm
+    docker run --rm -p 8080:8080 -e KEYCLOAK_ADMIN=keycloak -e KEYCLOAK_ADMIN_PASSWORD=keycloak -v ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json -v keycloakdata:/opt/keycloak/data quay.io/keycloak/keycloak:24.0.0 start-dev --import-realm
 
 ### docker compose fake prod stack
 

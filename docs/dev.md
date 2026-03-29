@@ -41,8 +41,8 @@ meme-generator/
 ### First-time setup
 
 ```bash
-# Copy and configure environment files
-cp .env.dev.example .env
+# Init the env files (create symbolic links in frontend/backend)
+just init-env
 
 # Install all dependencies (backend + frontend)
 just install-dev
@@ -52,9 +52,21 @@ See [`docs/env.md`](env.md) for every available variable and its default value.
 
 ### Running locally
 
+#### With Docker Compose
+
+```bash
+just dev-up
+```
+
+The app is available at <http://app.localhost>.
+
+Interactive API docs: <http://app.localhost/api/docs>.
+
+Keycloak: <http://keycloak.localhost>.
+
 #### Without Docker Compose
 
-Edit the Keycloak URL in `.env` and replace `http://keycloak.localhost` with `http://localhost:8080`.
+Edit the Keycloak URL in `.env` and uncomment the variables with "without docker compose".
 
 Open 3 terminals.
 
@@ -84,18 +96,6 @@ The app is available at <http://localhost:5173>.
 Interactive API docs: <http://localhost:8000/api/docs>.
 
 Keycloak admin: <http://localhost:8080> (user: `keycloak` / password: `keycloak`).
-
-#### With Docker Compose
-
-```bash
-just dev-up
-```
-
-The app is available at <http://app.localhost>.
-
-Interactive API docs: <http://app.localhost/api/docs>.
-
-Keycloak: <http://keycloak.localhost>.
 
 ---
 
