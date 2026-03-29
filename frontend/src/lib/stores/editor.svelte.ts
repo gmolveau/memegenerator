@@ -27,7 +27,7 @@ function defaultText(): TextLayer {
 }
 
 function createEditorState() {
-	let state = $state<EditorState>({
+	const state = $state<EditorState>({
 		template: null,
 		textLayers: [],
 		imageLayers: [],

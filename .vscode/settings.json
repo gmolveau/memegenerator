@@ -29,7 +29,7 @@
   },
   "editor.formatOnSave": true,
   "editor.formatOnType": true,
-  "eslint.validate": ["vue", "javascript", "typescript"],
+  "eslint.validate": ["vue", "javascript", "typescript", "svelte"],
   "eslint.enable": true,
   "eslint.useFlatConfig": true,
   "eslint.workingDirectories": ["frontend"],

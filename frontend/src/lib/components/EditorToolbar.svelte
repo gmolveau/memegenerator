@@ -135,7 +135,7 @@
 
 	<div class="border-t pt-3">
 		<p class="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">Effect</p>
-		{#each effects as ef}
+		{#each effects as ef (ef.value)}
 			<button
 				onclick={() => editor.setEffect(ef.value)}
 				class="w-full rounded px-2 py-1 text-left text-sm {editor.effect === ef.value

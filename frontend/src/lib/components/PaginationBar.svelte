@@ -32,7 +32,7 @@
 			← Prev
 		</button>
 
-		{#each pageWindow() as p}
+		{#each pageWindow() as p, i (i)}
 			{#if p === '…'}
 				<span class="px-1 text-sm text-gray-400">…</span>
 			{:else}

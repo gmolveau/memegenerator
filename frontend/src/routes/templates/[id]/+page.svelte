@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 	import { fetchTemplate } from '$lib/api/templates';
 	import MemeEditor from '$lib/components/MemeEditor.svelte';
@@ -14,7 +15,7 @@
 			const template = await fetchTemplate(templateId);
 			editor.setTemplate(template);
 		} catch {
-			goto('/');
+			goto(resolve('/'));
 		}
 	});
 </script>

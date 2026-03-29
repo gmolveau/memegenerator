@@ -8,6 +8,7 @@
 
 	let { canvasWidth }: Props = $props();
 
+	// eslint-disable-next-line svelte/prefer-writable-derived
 	let expandedId = $state<string | null>(null);
 
 	$effect(() => {
@@ -198,7 +199,7 @@
 
 					<div class="flex items-center gap-2">
 						<span class="text-xs text-gray-500">Align</span>
-						{#each ['left', 'center', 'right'] as align}
+						{#each ['left', 'center', 'right'] as align (align)}
 							<button
 								onclick={() =>
 									editor.updateTextLayer(layer.id, {
@@ -215,7 +216,7 @@
 
 					<div class="flex items-center gap-2">
 						<span class="text-xs text-gray-500">Vertical</span>
-						{#each [['top', 'Top'], ['middle', 'Mid'], ['bottom', 'Bot']] as [val, label]}
+						{#each [['top', 'Top'], ['middle', 'Mid'], ['bottom', 'Bot']] as [val, label] (val)}
 							<button
 								onclick={() =>
 									editor.updateTextLayer(layer.id, {

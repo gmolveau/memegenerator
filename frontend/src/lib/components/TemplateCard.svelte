@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { Template } from '$lib/types';
 
 	interface Props {
@@ -29,7 +30,7 @@
 		saveError,
 		canSave,
 		showId = false,
-		onstartEdit,
+		onstartEdit: _onstartEdit,
 		oncancelEdit,
 		onremoveKeyword,
 		onkeywordKeydown,
@@ -45,7 +46,10 @@
 		? 'border-indigo-500'
 		: 'border-transparent hover:border-gray-300'}"
 >
-	<a href="/templates/{template.id}/edit" class="group relative block w-full overflow-hidden">
+	<a
+		href={resolve(`/templates/${template.id}/edit`)}
+		class="group relative block w-full overflow-hidden"
+	>
 		<img
 			src={template.image_url}
 			alt={template.name}
@@ -78,7 +82,7 @@
 						? 'border-red-400'
 						: 'border-gray-300'}"
 				>
-					{#each editKeywords as kw}
+					{#each editKeywords as kw (kw)}
 						<span
 							class="flex items-center gap-0.5 rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700"
 						>
@@ -114,7 +118,7 @@
 						{saving ? 'Saving…' : 'Save'}
 					</button>
 					<a
-						href="/templates/{template.id}/edit"
+						href={resolve(`/templates/${template.id}/edit`)}
 						class="rounded border border-indigo-300 px-2 py-1 text-xs text-indigo-600 hover:bg-indigo-50"
 					>
 						Edit Layers
@@ -134,7 +138,7 @@
 			{/if}
 			{#if template.keywords.length > 0}
 				<div class="mt-1 flex flex-wrap gap-1">
-					{#each template.keywords as kw}
+					{#each template.keywords as kw (kw)}
 						<span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">{kw}</span>
 					{/each}
 				</div>

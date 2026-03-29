@@ -51,7 +51,7 @@
 	}
 
 	$effect(() => {
-		page; // track page changes; search changes are handled by the debounced oninput
+		void page; // track page changes; search changes are handled by the debounced oninput
 		untrack(load);
 	});
 
@@ -86,7 +86,7 @@
 	<!-- Grid -->
 	{#if loading}
 		<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-			{#each Array(8) as _}
+			{#each Array(8) as _item, i (i)}
 				<div class="aspect-square animate-pulse rounded-lg bg-gray-200"></div>
 			{/each}
 		</div>
@@ -123,7 +123,7 @@
 					← Prev
 				</button>
 
-				{#each pageWindow() as p}
+				{#each pageWindow() as p, i (i)}
 					{#if p === '…'}
 						<span class="px-1 text-sm text-gray-400">…</span>
 					{:else}

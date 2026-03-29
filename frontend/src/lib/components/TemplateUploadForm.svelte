@@ -69,7 +69,7 @@
 		<div
 			class="flex min-h-[2.5rem] flex-wrap items-center gap-1.5 rounded border border-gray-300 bg-white px-2 py-1.5 focus-within:ring-2 focus-within:ring-indigo-500"
 		>
-			{#each uploadKeywords as kw}
+			{#each uploadKeywords as kw (kw)}
 				<span
 					class="flex items-center gap-1 rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700"
 				>

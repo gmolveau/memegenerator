@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import { fetchTemplate, updateTemplate, uploadTemplate } from '$lib/api/templates';
 	import { auth } from '$lib/stores/auth.svelte';
-	import { fetchTemplate, uploadTemplate, updateTemplate } from '$lib/api/templates';
-	import AppHeader from './AppHeader.svelte';
 	import { editor } from '$lib/stores/editor.svelte';
-	import MemeEditor from './MemeEditor.svelte';
 	import type { TemplateTextLayer } from '$lib/types';
+	import { onMount } from 'svelte';
+	import AppHeader from './AppHeader.svelte';
+	import MemeEditor from './MemeEditor.svelte';
 
 	interface Props {
 		templateId?: number; // undefined = new template (upload flow)
@@ -29,7 +30,7 @@
 	onMount(async () => {
 		await auth.init();
 		if (!auth.user) {
-			goto('/');
+			goto(resolve('/'));
 			return;
 		}
 		if (templateId !== undefined) {
@@ -113,7 +114,7 @@
 				if (layers.length > 0) {
 					await updateTemplate(template.id, template.name, template.keywords, layers);
 				}
-				goto('/');
+				goto(resolve('/'));
 			} else {
 				await updateTemplate(templateId!, name, keywords, layers);
 				saved = true;
@@ -134,9 +135,10 @@
 			{#if !isNew || file}
 				<div class="mb-4 flex flex-col gap-2">
 					<div class="flex flex-col gap-1">
-						<label class="text-xs font-medium text-gray-600">Name *</label>
+						<label class="text-xs font-medium text-gray-600" for="title-input-field">Name *</label>
 						<input
 							type="text"
+							id="title-input-field"
 							bind:value={name}
 							placeholder="Template name"
 							class="w-full rounded-lg border px-3 py-1.5 text-sm focus:ring-2 focus:outline-none {name.trim()
@@ -146,14 +148,16 @@
 						/>
 					</div>
 					<div class="flex flex-col gap-1">
-						<label class="text-xs font-medium text-gray-600">Keywords *</label>
+						<label class="text-xs font-medium text-gray-600" for="keywords-input-field"
+							>Keywords *</label
+						>
 						<div
 							class="flex min-h-[2.25rem] flex-wrap items-center gap-1 rounded-lg border bg-white px-2 py-1 focus-within:ring-2 focus-within:ring-indigo-500 {keywords.length ===
 								0 && keywordInput === ''
 								? 'border-red-300'
 								: 'border-gray-300'}"
 						>
-							{#each keywords as kw}
+							{#each keywords as kw (kw)}
 								<span
 									class="flex items-center gap-0.5 rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700"
 								>
@@ -167,6 +171,7 @@
 							{/each}
 							<input
 								type="text"
+								id="keywords-input-field"
 								bind:value={keywordInput}
 								onkeydown={onKeywordKeydown}
 								onblur={addKeyword}

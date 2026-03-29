@@ -24,6 +24,7 @@ tests:
 
 lint:
     pnpm run lint
+    pnpm run check
 
 format:
     pnpm run format

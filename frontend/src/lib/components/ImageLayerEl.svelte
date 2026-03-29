@@ -11,7 +11,7 @@
 		onremove: () => void;
 	}
 
-	let { layer, selected, canvasHovered, onselect, onupdate, onremove }: Props = $props();
+	let { layer, selected, canvasHovered, onselect, onupdate, onremove: _onremove }: Props = $props();
 
 	let el = $state<HTMLDivElement | null>(null);
 

@@ -4,10 +4,11 @@
 	import { editor } from '$lib/stores/editor.svelte';
 	import type { Template } from '$lib/types';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	function selectTemplate(template: Template) {
 		editor.setTemplate(template);
-		goto(`/templates/${template.id}`);
+		goto(resolve(`/templates/${template.id}`));
 	}
 </script>
 

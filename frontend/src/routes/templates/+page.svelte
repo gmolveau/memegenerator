@@ -1,13 +1,14 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { loginUrl } from '$lib/api/auth';
-	import { auth } from '$lib/stores/auth.svelte';
 	import { fetchMyTemplates, updateTemplate } from '$lib/api/templates';
 	import AppHeader from '$lib/components/AppHeader.svelte';
-	import type { Template } from '$lib/types';
-	import TemplateCard from '$lib/components/TemplateCard.svelte';
 	import PaginationBar from '$lib/components/PaginationBar.svelte';
+	import TemplateCard from '$lib/components/TemplateCard.svelte';
+	import { auth } from '$lib/stores/auth.svelte';
+	import type { Template } from '$lib/types';
+	import { untrack } from 'svelte';
 
 	const PAGE_SIZE = 40;
 
@@ -45,7 +46,7 @@
 	}
 
 	$effect(() => {
-		page;
+		void page;
 		if (auth.user) untrack(load);
 	});
 
@@ -112,14 +113,14 @@
 			<p class="mb-4 text-sm text-red-600">{error}</p>
 		{:else if loading}
 			<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-				{#each Array(PAGE_SIZE) as _}
+				{#each Array(PAGE_SIZE) as _item, i (i)}
 					<div class="aspect-square animate-pulse rounded-lg bg-gray-200"></div>
 				{/each}
 			</div>
 		{:else if templates.length === 0}
 			<div class="py-16 text-center text-gray-500">
 				<p class="text-lg">You haven't uploaded any templates yet.</p>
-				<a href="/" class="mt-3 inline-block text-sm text-indigo-600 hover:underline"
+				<a href={resolve('/')} class="mt-3 inline-block text-sm text-indigo-600 hover:underline"
 					>Go to the gallery to upload one</a
 				>
 			</div>
