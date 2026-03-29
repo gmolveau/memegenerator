@@ -19,6 +19,7 @@ function defaultText(): TextLayer {
 		outlineColor: '#000000',
 		outlineWidth: 2,
 		align: 'center',
+		verticalAlign: 'middle',
 		bold: false,
 		italic: false,
 		allCaps: false
@@ -51,9 +52,35 @@ function createEditorState() {
 			return state.selectedLayerId;
 		},
 
+		clearTemplate() {
+			state.template = null;
+			state.textLayers = [];
+			state.imageLayers = [];
+			state.effect = 'none';
+			state.selectedLayerId = null;
+		},
+
 		setTemplate(template: Template) {
 			state.template = template;
-			state.textLayers = [];
+			state.textLayers = (template.text_layers ?? []).map((tl, i) => ({
+				id: `tpl-${i}`,
+				text: '',
+				x: tl.x,
+				y: tl.y,
+				width: tl.width,
+				height: tl.height,
+				rotation: tl.rotation,
+				fontSize: tl.fontSize,
+				fontFamily: tl.fontFamily,
+				color: tl.color,
+				outlineColor: tl.outlineColor,
+				outlineWidth: tl.outlineWidth,
+				align: tl.align,
+				verticalAlign: tl.verticalAlign ?? 'middle',
+				bold: tl.bold,
+				italic: tl.italic,
+				allCaps: tl.allCaps
+			}));
 			state.imageLayers = [];
 			state.effect = 'none';
 			state.selectedLayerId = null;

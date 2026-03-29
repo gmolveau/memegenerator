@@ -1,9 +1,28 @@
+export interface TemplateTextLayer {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+	rotation: number;
+	fontSize: number;
+	fontFamily: string;
+	color: string;
+	outlineColor: string;
+	outlineWidth: number;
+	align: 'left' | 'center' | 'right';
+	verticalAlign: 'top' | 'middle' | 'bottom';
+	bold: boolean;
+	italic: boolean;
+	allCaps: boolean;
+}
+
 export interface Template {
 	id: number;
 	name: string;
 	keywords: string[];
 	image_url: string;
 	created_at: string;
+	text_layers: TemplateTextLayer[];
 }
 
 export interface TextLayer {
@@ -20,6 +39,7 @@ export interface TextLayer {
 	outlineColor: string;
 	outlineWidth: number;
 	align: 'left' | 'center' | 'right';
+	verticalAlign: 'top' | 'middle' | 'bottom';
 	bold: boolean;
 	italic: boolean;
 	allCaps: boolean;

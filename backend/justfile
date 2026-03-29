@@ -29,8 +29,8 @@ migrate:
     uv run alembic -c src/migrations/alembic.ini upgrade head
 
 ruff:
-    uv run ruff check . --fix
     uv run ruff format .
+    uv run ruff check . --fix
 
 ruff-check:
     uv run ruff check src tests cli migrations

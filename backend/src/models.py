@@ -97,6 +97,9 @@ class Template(BaseModel):
     filename: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     keywords: Mapped[str] = mapped_column(Text, nullable=False, default="")
     popularity: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    creator_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    creator_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
+    text_layers: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
 
     creator: Mapped["User | None"] = relationship("User")

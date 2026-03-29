@@ -213,6 +213,23 @@
 						{/each}
 					</div>
 
+					<div class="flex items-center gap-2">
+						<span class="text-xs text-gray-500">Vertical</span>
+						{#each [['top', 'Top'], ['middle', 'Mid'], ['bottom', 'Bot']] as [val, label]}
+							<button
+								onclick={() =>
+									editor.updateTextLayer(layer.id, {
+										verticalAlign: val as TextLayer['verticalAlign']
+									})}
+								class="rounded px-2 py-0.5 text-xs {layer.verticalAlign === val
+									? 'bg-indigo-600 text-white'
+									: 'bg-gray-100 text-gray-700'}"
+							>
+								{label}
+							</button>
+						{/each}
+					</div>
+
 					<label class="flex flex-col gap-1">
 						<span class="text-xs text-gray-500">Rotation — {Math.round(layer.rotation)}°</span>
 						<input

@@ -2,14 +2,12 @@
 	import { untrack } from 'svelte';
 	import { fetchTemplates } from '$lib/api/templates';
 	import type { Template } from '$lib/types';
-	import TemplateUploadForm from './TemplateUploadForm.svelte';
 
 	interface Props {
 		onselect: (template: Template) => void;
-		authenticated?: boolean;
 	}
 
-	let { onselect, authenticated = false }: Props = $props();
+	let { onselect }: Props = $props();
 
 	const PAGE_SIZE = 40;
 
@@ -19,7 +17,6 @@
 	let page = $state(0);
 	let loading = $state(false);
 	let error = $state('');
-	let showUpload = $state(false);
 
 	const totalPages = $derived(Math.ceil(total / PAGE_SIZE));
 
@@ -41,7 +38,11 @@
 		loading = true;
 		error = '';
 		try {
-			({ templates, total } = await fetchTemplates(search || undefined, PAGE_SIZE, page * PAGE_SIZE));
+			({ templates, total } = await fetchTemplates(
+				search || undefined,
+				PAGE_SIZE,
+				page * PAGE_SIZE
+			));
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load templates';
 		} finally {
@@ -64,15 +65,10 @@
 	function goToPage(p: number) {
 		page = p;
 	}
-
-	function onUploaded(template: Template) {
-		templates = [template, ...templates];
-		showUpload = false;
-	}
 </script>
 
 <div class="flex flex-col gap-4">
-	<!-- Search + Upload toolbar -->
+	<!-- Search toolbar -->
 	<div class="flex gap-2">
 		<input
 			type="search"
@@ -81,19 +77,7 @@
 			oninput={onSearchInput}
 			class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
 		/>
-		{#if authenticated}
-			<button
-				onclick={() => (showUpload = !showUpload)}
-				class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-			>
-				{showUpload ? 'Cancel' : '+ Upload'}
-			</button>
-		{/if}
 	</div>
-
-	{#if showUpload}
-		<TemplateUploadForm onuploaded={onUploaded} />
-	{/if}
 
 	{#if error}
 		<p class="text-sm text-red-600">{error}</p>

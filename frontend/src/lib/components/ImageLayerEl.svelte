@@ -5,12 +5,13 @@
 	interface Props {
 		layer: ImageLayer;
 		selected: boolean;
+		canvasHovered: boolean;
 		onselect: () => void;
 		onupdate: (patch: Partial<ImageLayer>) => void;
 		onremove: () => void;
 	}
 
-	let { layer, selected, onselect, onupdate, onremove }: Props = $props();
+	let { layer, selected, canvasHovered, onselect, onupdate, onremove }: Props = $props();
 
 	let el = $state<HTMLDivElement | null>(null);
 
@@ -30,7 +31,9 @@
 	data-layer="image"
 	role="button"
 	tabindex="0"
-	class="absolute cursor-move touch-none {selected ? 'ring-2 ring-indigo-500 ring-offset-1' : ''}"
+	class="absolute cursor-move touch-none {selected || canvasHovered
+		? 'ring-2 ring-indigo-500 ring-offset-1'
+		: ''}"
 	style="left:{layer.x}px; top:{layer.y}px; width:{layer.width}px; height:{layer.height}px; transform:rotate({layer.rotation}deg); transform-origin:center;"
 	onpointerdown={interactions.onPointerDown}
 	onpointermove={interactions.onPointerMove}

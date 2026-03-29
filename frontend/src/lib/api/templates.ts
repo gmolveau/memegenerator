@@ -1,5 +1,5 @@
 import { API_URL, apiFetch } from '$lib/api/client';
-import type { Template } from '$lib/types';
+import type { Template, TemplateTextLayer } from '$lib/types';
 
 function normalizeUrl(url: string): string {
 	return url.startsWith('http') ? url : `${API_URL}${url}`;
@@ -28,15 +28,24 @@ export async function incrementPopularity(id: number): Promise<void> {
 	await apiFetch(`/templates/${id}/popularity`, { method: 'POST' });
 }
 
+export async function fetchTemplate(id: number): Promise<Template> {
+	const res = await fetch(`${API_URL}/templates/${id}`);
+	if (!res.ok) throw new Error(`Failed to fetch template: ${res.status}`);
+	return toTemplate(await res.json());
+}
+
 export async function updateTemplate(
 	id: number,
 	name: string,
-	keywords: string[]
+	keywords: string[],
+	text_layers?: TemplateTextLayer[]
 ): Promise<Template> {
+	const body: Record<string, unknown> = { name, keywords };
+	if (text_layers !== undefined) body.text_layers = text_layers;
 	const res = await apiFetch(`/templates/${id}`, {
 		method: 'PATCH',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ name, keywords })
+		body: JSON.stringify(body)
 	});
 	if (!res.ok) throw new Error(`Update failed: ${res.status}`);
 	return toTemplate(await res.json());

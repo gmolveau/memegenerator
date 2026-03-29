@@ -5,12 +5,13 @@
 	interface Props {
 		layer: TextLayer;
 		selected: boolean;
+		canvasHovered: boolean;
 		onselect: () => void;
 		onupdate: (patch: Partial<TextLayer>) => void;
 		onremove: () => void;
 	}
 
-	let { layer, selected, onselect, onupdate, onremove }: Props = $props();
+	let { layer, selected, canvasHovered, onselect, onupdate, onremove }: Props = $props();
 
 	let el = $state<HTMLDivElement | null>(null);
 	let textareaEl = $state<HTMLTextAreaElement | null>(null);
@@ -66,6 +67,14 @@
          -${layer.outlineWidth}px ${layer.outlineWidth}px 0 ${layer.outlineColor}`
 			: 'none'
 	);
+	const vJustify = $derived(
+		layer.verticalAlign === 'middle'
+			? 'center'
+			: layer.verticalAlign === 'bottom'
+				? 'flex-end'
+				: 'flex-start'
+	);
+
 	const sharedTextStyle = $derived(`
 		font: ${fontStyle};
 		color: ${layer.color};
@@ -83,7 +92,7 @@
 	data-layer="text"
 	role="button"
 	tabindex="0"
-	class="absolute touch-none {editing ? 'cursor-text' : 'cursor-move'} {selected
+	class="absolute touch-none {editing ? 'cursor-text' : 'cursor-move'} {selected || canvasHovered
 		? 'ring-2 ring-indigo-500 ring-offset-1'
 		: ''}"
 	style="left:{layer.x}px; top:{layer.y}px; width:{layer.width}px; height:{layer.height}px; transform:rotate({layer.rotation}deg); transform-origin:center;"
@@ -104,10 +113,11 @@
 		></textarea>
 	{:else}
 		<div
-			class="h-full w-full overflow-hidden break-words whitespace-pre-wrap"
-			style={sharedTextStyle}
+			style="display:flex; flex-direction:column; justify-content:{vJustify}; height:100%; width:100%; overflow:hidden;"
 		>
-			{layer.text}
+			<div class="break-words whitespace-pre-wrap" style={sharedTextStyle}>
+				{layer.text}
+			</div>
 		</div>
 	{/if}
 

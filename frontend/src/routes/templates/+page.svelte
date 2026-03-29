@@ -1,16 +1,15 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { getMe, loginUrl, logout, type User } from '$lib/api/auth';
+	import { loginUrl } from '$lib/api/auth';
+	import { auth } from '$lib/stores/auth.svelte';
 	import { fetchMyTemplates, updateTemplate } from '$lib/api/templates';
+	import AppHeader from '$lib/components/AppHeader.svelte';
 	import type { Template } from '$lib/types';
 	import TemplateCard from '$lib/components/TemplateCard.svelte';
 	import PaginationBar from '$lib/components/PaginationBar.svelte';
 
 	const PAGE_SIZE = 40;
-
-	let user = $state<User | null>(null);
-	let authChecked = $state(false);
 
 	let templates = $state<Template[]>([]);
 	let total = $state(0);
@@ -29,11 +28,8 @@
 	let saveError = $state('');
 
 	$effect(() => {
-		getMe().then((u) => {
-			user = u;
-			authChecked = true;
-			if (!u) goto(loginUrl('/templates'));
-		});
+		if (auth.user === undefined) return;
+		if (!auth.user) goto(loginUrl('/templates'));
 	});
 
 	async function load() {
@@ -50,7 +46,7 @@
 
 	$effect(() => {
 		page;
-		if (authChecked && user) untrack(load);
+		if (auth.user) untrack(load);
 	});
 
 	function goToPage(p: number) {
@@ -109,29 +105,10 @@
 </script>
 
 <div class="min-h-screen bg-gray-50">
-	<header class="border-b bg-white shadow-sm">
-		<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-			<h1 class="text-xl font-bold tracking-tight text-indigo-700">My Templates</h1>
-			<div class="flex items-center gap-4">
-				{#if user}
-					{#if user.role === 'admin' || user.role === 'superadmin'}
-						<a href="/admin" class="text-sm text-gray-500 hover:text-indigo-600">Admin</a>
-					{/if}
-					<span class="text-sm font-medium text-gray-700">{user.name}</span>
-					<button
-						onclick={() => logout().then(() => goto('/'))}
-						class="text-sm text-gray-400 hover:text-red-500">(logout)</button
-					>
-				{/if}
-				<a href="/" class="text-sm text-indigo-600 hover:underline">← Back</a>
-			</div>
-		</div>
-	</header>
+	<AppHeader />
 
 	<main class="mx-auto max-w-6xl px-4 py-8">
-		{#if !authChecked}
-			<!-- waiting for auth check -->
-		{:else if error}
+		{#if error}
 			<p class="mb-4 text-sm text-red-600">{error}</p>
 		{:else if loading}
 			<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">

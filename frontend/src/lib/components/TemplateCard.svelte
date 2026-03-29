@@ -45,10 +45,7 @@
 		? 'border-indigo-500'
 		: 'border-transparent hover:border-gray-300'}"
 >
-	<button
-		onclick={() => (isEditing ? oncancelEdit() : onstartEdit(template))}
-		class="group relative w-full overflow-hidden"
-	>
+	<a href="/templates/{template.id}/edit" class="group relative block w-full overflow-hidden">
 		<img
 			src={template.image_url}
 			alt={template.name}
@@ -58,11 +55,9 @@
 		<div
 			class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100"
 		>
-			<span class="rounded bg-white px-2 py-1 text-xs font-medium text-gray-800">
-				{isEditing ? 'Cancel' : 'Edit'}
-			</span>
+			<span class="rounded bg-white px-2 py-1 text-xs font-medium text-gray-800">Edit</span>
 		</div>
-	</button>
+	</a>
 
 	<div class="p-3">
 		{#if isEditing}
@@ -118,6 +113,12 @@
 					>
 						{saving ? 'Saving…' : 'Save'}
 					</button>
+					<a
+						href="/templates/{template.id}/edit"
+						class="rounded border border-indigo-300 px-2 py-1 text-xs text-indigo-600 hover:bg-indigo-50"
+					>
+						Edit Layers
+					</a>
 					<button
 						onclick={oncancelEdit}
 						class="rounded border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:bg-gray-50"

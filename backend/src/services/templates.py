@@ -1,5 +1,6 @@
 """Template service — CRUD and file handling."""
 
+import json
 import uuid
 
 from fastapi import UploadFile
@@ -9,12 +10,13 @@ from sqlalchemy.orm import Session
 from src.models import Template
 from src.storage.disk import StorageDisk
 
-ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
+ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp", "image/bmp"}
+MAX_FILE_SIZE = 3 * 1024 * 1024  # 3 MB
 EXTENSION_MAP = {
     "image/jpeg": ".jpg",
     "image/png": ".png",
-    "image/gif": ".gif",
     "image/webp": ".webp",
+    "image/bmp": ".bmp",
 }
 
 
@@ -78,6 +80,10 @@ def create_template(
 ) -> Template:
     if file.content_type not in ALLOWED_CONTENT_TYPES:
         raise ValueError(f"Unsupported file type: {file.content_type}")
+    content = file.file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise ValueError("File size exceeds the 3 MB limit")
+    file.file.seek(0)
 
     ext = EXTENSION_MAP[file.content_type]
     filename = f"{uuid.uuid4().hex}{ext}"
@@ -100,12 +106,15 @@ def update_template(
     template_id: int,
     name: str,
     keywords: list[str],
+    text_layers: list[dict] | None = None,
 ) -> Template | None:
     template = get_template(db, template_id)
     if not template:
         return None
     template.name = name
     template.keywords = ",".join(k.strip() for k in keywords if k.strip())
+    if text_layers is not None:
+        template.text_layers = json.dumps(text_layers)
     db.commit()
     db.refresh(template)
     return template

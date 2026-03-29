@@ -1,5 +1,6 @@
 """Meme templates endpoints."""
 
+import json
 from typing import Annotated
 
 from fastapi import APIRouter, Form, HTTPException, Query, UploadFile
@@ -10,6 +11,7 @@ from src.models import Template
 from src.schemas.template import (
     TemplateListResponse,
     TemplateResponse,
+    TemplateTextLayerSchema,
     TemplateUpdateRequest,
 )
 from src.services import templates as template_service
@@ -19,6 +21,11 @@ router = APIRouter(prefix="/templates", tags=["templates"])
 
 
 def _to_response(t: Template, disk: StorageDisk) -> TemplateResponse:
+    try:
+        raw_layers = json.loads(t.text_layers or "[]")
+        text_layers = [TemplateTextLayerSchema(**layer) for layer in raw_layers]
+    except Exception:
+        text_layers = []
     return TemplateResponse(
         id=t.id,
         name=t.name,
@@ -26,6 +33,7 @@ def _to_response(t: Template, disk: StorageDisk) -> TemplateResponse:
         image_url=disk.url(t.filename),
         popularity=t.popularity,
         created_at=t.created_at,
+        text_layers=text_layers,
     )
 
 
@@ -123,10 +131,17 @@ def update_template(
     if not is_admin and not is_creator:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    template = template_service.update_template(
-        db, template_id, name=body.name, keywords=body.keywords
+    updated = template_service.update_template(
+        db,
+        template_id,
+        name=body.name,
+        keywords=body.keywords,
+        text_layers=[layer.model_dump() for layer in body.text_layers]
+        if body.text_layers is not None
+        else None,
     )
-    return _to_response(template, disk)
+    assert updated is not None
+    return _to_response(updated, disk)
 
 
 @router.post(path="/{template_id}/popularity", status_code=204)

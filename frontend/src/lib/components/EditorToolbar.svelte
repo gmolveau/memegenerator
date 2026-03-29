@@ -6,9 +6,11 @@
 	interface Props {
 		canvasHeight: number;
 		templateImg: HTMLImageElement | null;
+		templateMode?: boolean;
+		onsave?: () => void;
 	}
 
-	let { canvasHeight, templateImg }: Props = $props();
+	let { canvasHeight, templateImg, templateMode = false, onsave }: Props = $props();
 
 	const CANVAS_WIDTH = 600;
 
@@ -84,17 +86,24 @@
 			const style = layer.italic ? 'italic ' : '';
 			ctx.font = `${style}${weight}${layer.fontSize}px ${layer.fontFamily}`;
 			ctx.textAlign = layer.align;
+			ctx.textBaseline = 'top';
 			ctx.fillStyle = layer.color;
 			const tx =
 				layer.align === 'center' ? layer.width / 2 : layer.align === 'right' ? layer.width : 0;
+			const ty =
+				layer.verticalAlign === 'bottom'
+					? layer.height - layer.fontSize
+					: layer.verticalAlign === 'middle'
+						? (layer.height - layer.fontSize) / 2
+						: 0;
 			const text = layer.allCaps ? layer.text.toUpperCase() : layer.text;
 			if (layer.outlineWidth > 0) {
 				ctx.strokeStyle = layer.outlineColor;
 				ctx.lineWidth = layer.outlineWidth * 2;
 				ctx.lineJoin = 'round';
-				ctx.strokeText(text, tx, layer.fontSize);
+				ctx.strokeText(text, tx, ty);
 			}
-			ctx.fillText(text, tx, layer.fontSize);
+			ctx.fillText(text, tx, ty);
 			ctx.restore();
 		}
 
@@ -139,11 +148,20 @@
 	</div>
 
 	<div class="mt-auto border-t pt-3">
-		<button
-			onclick={downloadMeme}
-			class="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
-		>
-			⬇ Download JPG
-		</button>
+		{#if templateMode}
+			<button
+				onclick={onsave}
+				class="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+			>
+				Save Template
+			</button>
+		{:else}
+			<button
+				onclick={downloadMeme}
+				class="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+			>
+				⬇ Download JPG
+			</button>
+		{/if}
 	</div>
 </div>
