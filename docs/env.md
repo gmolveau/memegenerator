@@ -35,11 +35,10 @@ Configured via a `.env` file at the repo root (e.g. copy `.env.dev.example`).
 
 ### Session
 
-| Variable                     | Default | Required | Description                                                   |
-| ---------------------------- | ------- | -------- | ------------------------------------------------------------- |
-| `SESSION_SECRET_KEY`         | —       | **Yes**  | Secret used to sign the session cookie (use a random string). |
-| `SESSION_COOKIE_BASE_DOMAIN` | —       | **Yes**  | Domain the session cookie is scoped to (e.g. `localhost`).    |
-| `SESSION_COOKIE_MAX_AGE`     | —       | **Yes**  | Session cookie lifetime in seconds (e.g. `86400` = 24 h).     |
+| Variable                 | Default | Required | Description                                                   |
+| ------------------------ | ------- | -------- | ------------------------------------------------------------- |
+| `SESSION_SECRET_KEY`     | —       | **Yes**  | Secret used to sign the session cookie (use a random string). |
+| `SESSION_COOKIE_MAX_AGE` | —       | **Yes**  | Session cookie lifetime in seconds (e.g. `86400` = 24 h).     |
 
 ### Environment
 

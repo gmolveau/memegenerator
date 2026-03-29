@@ -17,7 +17,6 @@ class Settings(BaseSettings):
 
     # Session
     SESSION_SECRET_KEY: str
-    SESSION_COOKIE_BASE_DOMAIN: str
     SESSION_COOKIE_MAX_AGE: int
 
     # Environment

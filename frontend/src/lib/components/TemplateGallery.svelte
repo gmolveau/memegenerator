@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import { fetchTemplates } from '$lib/api/templates';
 	import type { Template } from '$lib/types';
+	import { untrack } from 'svelte';
 
 	interface Props {
 		onselect: (template: Template) => void;
@@ -72,7 +72,7 @@
 	<div class="flex gap-2">
 		<input
 			type="search"
-			placeholder="Search templates…"
+			placeholder="Search templates (title, keywords)..."
 			bind:value={search}
 			oninput={onSearchInput}
 			class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"

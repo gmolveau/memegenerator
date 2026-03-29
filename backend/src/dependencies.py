@@ -18,28 +18,23 @@ DiskDep = Annotated[StorageDisk, Depends(get_disk)]
 ADMIN_ROLES = {"admin", "superadmin"}
 
 
-def get_current_user(request: Request, db: Session = Depends(get_db)) -> User | None:
-    """Return the logged-in User ORM object, or None if not authenticated."""
+def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
+    """Return the logged-in User ORM object, or raise 401 if not authenticated."""
     session_user = request.session.get("user")
     if not session_user:
-        return None
+        raise HTTPException(status_code=401, detail="Not authenticated")
     sub = session_user.get("sub")
     if not sub:
-        return None
-    return db.query(User).filter(User.sub == sub).first()
-
-
-CurrentUserDep = Annotated[User | None, Depends(get_current_user)]
-
-
-def require_current_user(user: CurrentUserDep) -> User:
-    """Raise 401 if the user is not authenticated."""
+        request.session.clear()
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    user = db.query(User).filter(User.sub == sub).first()
     if user is None:
+        request.session.clear()
         raise HTTPException(status_code=401, detail="Not authenticated")
     return user
 
 
-AuthUserDep = Annotated[User, Depends(require_current_user)]
+CurrentUserDep = Annotated[User, Depends(get_current_user)]
 
 
 def require_admin(request: Request) -> None:

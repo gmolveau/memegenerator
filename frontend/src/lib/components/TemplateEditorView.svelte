@@ -1,11 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { fetchTemplate, updateTemplate, uploadTemplate } from '$lib/api/templates';
+	import {
+		deleteTemplate,
+		fetchTemplate,
+		updateTemplate,
+		uploadTemplate
+	} from '$lib/api/templates';
 	import { auth } from '$lib/stores/auth.svelte';
 	import { editor } from '$lib/stores/editor.svelte';
 	import type { TemplateTextLayer } from '$lib/types';
-	import { onMount } from 'svelte';
+	import { untrack } from 'svelte';
 	import AppHeader from './AppHeader.svelte';
 	import MemeEditor from './MemeEditor.svelte';
 
@@ -27,24 +32,27 @@
 	const isNew = $derived(templateId === undefined);
 	const canSave = $derived(name.trim().length > 0 && keywords.length > 0 && (!isNew || !!file));
 
-	onMount(async () => {
-		await auth.init();
+	$effect(() => {
+		if (auth.user === undefined) return;
 		if (!auth.user) {
 			goto(resolve('/'));
 			return;
 		}
-		if (templateId !== undefined) {
-			try {
-				const t = await fetchTemplate(templateId);
-				name = t.name;
-				keywords = [...t.keywords];
-				editor.setTemplate(t);
-			} catch {
-				error = 'Template not found.';
+		untrack(() => {
+			if (templateId !== undefined) {
+				fetchTemplate(templateId)
+					.then((t) => {
+						name = t.name;
+						keywords = [...t.keywords];
+						editor.setTemplate(t);
+					})
+					.catch(() => {
+						error = 'Template not found.';
+					});
+			} else {
+				editor.clearTemplate();
 			}
-		} else {
-			editor.clearTemplate();
-		}
+		});
 	});
 
 	const MAX_SIZE = 3 * 1024 * 1024; // 3 MB
@@ -102,6 +110,16 @@
 		}));
 	}
 
+	async function handleDelete() {
+		if (!templateId || !confirm('Delete this template? This cannot be undone.')) return;
+		try {
+			await deleteTemplate(templateId);
+			goto(resolve('/'));
+		} catch (e: unknown) {
+			error = e instanceof Error ? e.message : 'Delete failed.';
+		}
+	}
+
 	async function handleSave() {
 		if (!canSave) return;
 		saving = true;
@@ -114,7 +132,7 @@
 				if (layers.length > 0) {
 					await updateTemplate(template.id, template.name, template.keywords, layers);
 				}
-				goto(resolve('/'));
+				goto(resolve('/templates'));
 			} else {
 				await updateTemplate(templateId!, name, keywords, layers);
 				saved = true;
@@ -190,6 +208,7 @@
 				<MemeEditor
 					templateMode={true}
 					onsave={canSave && !saving ? handleSave : undefined}
+					ondelete={!isNew ? handleDelete : undefined}
 					onimageupload={isNew ? handleImageUpload : undefined}
 				/>
 			</div>

@@ -61,6 +61,11 @@ export async function fetchMyTemplates(
 	return { templates: data.templates.map(toTemplate), total: data.total };
 }
 
+export async function deleteTemplate(id: number): Promise<void> {
+	const res = await apiFetch(`/templates/${id}`, { method: 'DELETE' });
+	if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
+}
+
 export async function uploadTemplate(
 	name: string,
 	keywords: string[],

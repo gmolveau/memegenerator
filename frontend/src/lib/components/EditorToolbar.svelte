@@ -8,9 +8,10 @@
 		templateImg: HTMLImageElement | null;
 		templateMode?: boolean;
 		onsave?: () => void;
+		ondelete?: () => void;
 	}
 
-	let { canvasHeight, templateImg, templateMode = false, onsave }: Props = $props();
+	let { canvasHeight, templateImg, templateMode = false, onsave, ondelete }: Props = $props();
 
 	const CANVAS_WIDTH = 600;
 
@@ -149,12 +150,22 @@
 
 	<div class="mt-auto border-t pt-3">
 		{#if templateMode}
-			<button
-				onclick={onsave}
-				class="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
-			>
-				Save Template
-			</button>
+			<div class="flex flex-col gap-2">
+				<button
+					onclick={onsave}
+					class="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+				>
+					Save Template
+				</button>
+				{#if ondelete}
+					<button
+						onclick={ondelete}
+						class="w-full rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
+					>
+						Delete Template
+					</button>
+				{/if}
+			</div>
 		{:else}
 			<button
 				onclick={downloadMeme}

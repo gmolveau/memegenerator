@@ -50,7 +50,7 @@
 		<!-- Rotation handle -->
 		<div
 			data-rotate="true"
-			class="absolute -top-7 left-1/2 flex h-5 w-5 -translate-x-1/2 cursor-grab items-center justify-center rounded-full bg-indigo-500 text-xs text-white opacity-90 select-none active:cursor-grabbing"
+			class="absolute top-1 left-1/2 flex h-5 w-5 -translate-x-1/2 cursor-grab items-center justify-center rounded-full bg-indigo-500 text-xs text-white opacity-90 select-none active:cursor-grabbing"
 			onpointerdown={interactions.onRotateDown}
 			onpointermove={interactions.onRotateMove}
 			onpointerup={interactions.onRotateUp}

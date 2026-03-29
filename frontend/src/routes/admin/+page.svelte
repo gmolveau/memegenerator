@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import { fetchTemplates, updateTemplate } from '$lib/api/templates';
-	import type { Template } from '$lib/types';
-	import TemplateCard from '$lib/components/TemplateCard.svelte';
-	import PaginationBar from '$lib/components/PaginationBar.svelte';
 	import AppHeader from '$lib/components/AppHeader.svelte';
+	import PaginationBar from '$lib/components/PaginationBar.svelte';
+	import TemplateCard from '$lib/components/TemplateCard.svelte';
+	import type { Template } from '$lib/types';
+	import { untrack } from 'svelte';
 
 	const PAGE_SIZE = 40;
 
@@ -115,7 +115,7 @@
 		<div class="mb-6 flex items-center gap-4">
 			<input
 				type="search"
-				placeholder="Search templates…"
+				placeholder="Search templates (title, keywords)..."
 				bind:value={search}
 				oninput={onSearchInput}
 				class="w-full max-w-sm rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"

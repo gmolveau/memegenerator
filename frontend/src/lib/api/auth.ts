@@ -10,6 +10,7 @@ export interface User {
 }
 
 export async function getMe(): Promise<User | null> {
+	if (!document.cookie.split(';').some((c) => c.trim().startsWith('has_session='))) return null;
 	try {
 		const res = await apiFetch('/auth/me');
 		if (!res.ok) return null;

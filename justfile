@@ -42,6 +42,9 @@ localprod-stop:
 localprod-clean:
     docker compose -f compose.localprod.yml down --volumes
 
+localprod-backend-shell:
+    docker compose -f compose.localprod.yml exec backend bash
+
 ### versioning
 
 bump-version bump:

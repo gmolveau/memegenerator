@@ -74,13 +74,27 @@ async def authorize_endpoint(request: Request, db: SessionDep):
     }
 
     next_url = request.session.pop("next_url", "/")
-    return RedirectResponse(url=next_url)
+    response = RedirectResponse(url=next_url)
+    # has_session is an indicator cookie, hence the httponly set to false
+    # so that the frontend can detect if the user is logged in
+    response.set_cookie(
+        key="has_session",
+        value="1",
+        max_age=settings.SESSION_COOKIE_MAX_AGE,
+        httponly=False,
+        samesite="lax",
+    )
+    return response
 
 
 @router.get("/logout")
 def logout(request: Request) -> JSONResponse:
     request.session.clear()
-    return JSONResponse(content={"status": "logged out"})
+    response = JSONResponse(content={"status": "logged out"})
+    response.delete_cookie(
+        key="has_session",
+    )
+    return response
 
 
 @router.get("/me")

@@ -7,8 +7,6 @@ from fastapi import APIRouter, Form, HTTPException, Query, UploadFile
 
 from src.dependencies import (
     ADMIN_ROLES,
-    AdminDep,
-    AuthUserDep,
     CurrentUserDep,
     DiskDep,
     SessionDep,
@@ -61,10 +59,10 @@ def list_templates(
 
 
 @router.get(path="/mine", response_model=TemplateListResponse)
-def list_my_templates(
+def list_user_templates(
     db: SessionDep,
     disk: DiskDep,
-    current_user: AuthUserDep,
+    current_user: CurrentUserDep,
     limit: Annotated[int, Query(ge=1, le=100)] = 40,
     offset: Annotated[int, Query(ge=0)] = 0,
 ):
@@ -106,7 +104,7 @@ def upload_template(
             name,
             keyword_list,
             file,
-            creator_id=current_user.id if current_user else None,
+            creator_id=current_user.id,
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -117,7 +115,7 @@ def upload_template(
 def update_template(
     db: SessionDep,
     disk: DiskDep,
-    current_user: AuthUserDep,
+    current_user: CurrentUserDep,
     template_id: int,
     body: TemplateUpdateRequest,
 ):
@@ -151,11 +149,21 @@ def increment_popularity(
         raise HTTPException(status_code=404, detail="Template not found")
 
 
-@router.delete(path="/{template_id}", status_code=204, dependencies=[AdminDep])
+@router.delete(path="/{template_id}", status_code=204)
 def delete_template(
     db: SessionDep,
     disk: DiskDep,
+    current_user: CurrentUserDep,
     template_id: int,
 ):
+    template = template_service.get_template(db, template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    is_admin = current_user.role is not None and current_user.role.name in ADMIN_ROLES
+    is_creator = template.creator_id == current_user.id
+    if not is_admin and not is_creator:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
     if not template_service.delete_template(db, disk, template_id):
         raise HTTPException(status_code=404, detail="Template not found")

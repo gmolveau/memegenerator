@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { loginUrl } from '$lib/api/auth';
 	import { fetchMyTemplates, updateTemplate } from '$lib/api/templates';
 	import AppHeader from '$lib/components/AppHeader.svelte';
 	import PaginationBar from '$lib/components/PaginationBar.svelte';
@@ -30,7 +29,7 @@
 
 	$effect(() => {
 		if (auth.user === undefined) return;
-		if (!auth.user) goto(loginUrl('/templates'));
+		if (!auth.user) goto(resolve('/templates'));
 	});
 
 	async function load() {
@@ -121,7 +120,7 @@
 			<div class="py-16 text-center text-gray-500">
 				<p class="text-lg">You haven't uploaded any templates yet.</p>
 				<a href={resolve('/')} class="mt-3 inline-block text-sm text-indigo-600 hover:underline"
-					>Go to the gallery to upload one</a
+					>Go back to the gallery</a
 				>
 			</div>
 		{:else}

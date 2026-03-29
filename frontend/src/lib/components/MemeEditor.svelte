@@ -8,10 +8,11 @@
 	interface Props {
 		templateMode?: boolean;
 		onsave?: () => void;
+		ondelete?: () => void;
 		onimageupload?: (file: File) => void;
 	}
 
-	let { templateMode = false, onsave, onimageupload }: Props = $props();
+	let { templateMode = false, onsave, ondelete, onimageupload }: Props = $props();
 
 	const CANVAS_WIDTH = 600;
 	let canvasHeight = $state(450);
@@ -48,7 +49,7 @@
 </script>
 
 <div class="flex flex-col gap-4 lg:flex-row">
-	<EditorToolbar {canvasHeight} {templateImg} {templateMode} {onsave} />
+	<EditorToolbar {canvasHeight} {templateImg} {templateMode} {onsave} {ondelete} />
 
 	<!-- Editor canvas -->
 	<div class="flex flex-1 flex-col gap-3">
