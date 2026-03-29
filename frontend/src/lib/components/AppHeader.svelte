@@ -5,7 +5,10 @@
 
 <header class="border-b bg-white shadow-sm">
 	<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-		<a href="/" class="text-xl font-bold tracking-tight text-indigo-700">Meme Generator</a>
+		<div class="flex items-baseline gap-2">
+			<a href="/" class="text-xl font-bold tracking-tight text-indigo-700">Meme Generator</a>
+			<span class="text-xs text-gray-400">v{__APP_VERSION__}</span>
+		</div>
 		<div class="flex items-center gap-4">
 			{#if auth.user}
 				{#if auth.user.role === 'admin' || auth.user.role === 'superadmin'}

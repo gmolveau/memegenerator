@@ -20,6 +20,8 @@ EXPOSE 5173
 CMD [ "just", "run-dev" ]
 
 FROM dev_base AS build-prod
+ARG APP_VERSION=dev
+ENV APP_VERSION=$APP_VERSION
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store just install-prod && just build
 
 FROM base AS prod

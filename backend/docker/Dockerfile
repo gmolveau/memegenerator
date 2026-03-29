@@ -25,6 +25,9 @@ CMD ["just", "run-dev"]
 
 FROM base AS prod
 
+ARG APP_VERSION=dev
+ENV APP_VERSION=$APP_VERSION
+
 WORKDIR /app
 
 RUN --mount=type=cache,target=/root/.cache/uv \
