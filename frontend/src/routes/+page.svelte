@@ -19,9 +19,8 @@
 		<div class="mb-6">
 			<h2 class="text-2xl font-semibold text-gray-800">Choose a template</h2>
 			<p class="mt-1 text-sm text-gray-500">
-				Browse, search, or upload your own image to get started.
-				<br>
-				Login to create new templates.
+				Browse, search, or upload your own image to get started.- Login to create new templates. -
+				All templates are public.
 			</p>
 		</div>
 		<TemplateGallery onselect={selectTemplate} />
