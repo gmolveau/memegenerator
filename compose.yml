@@ -1,3 +1,13 @@
+x-backend-base: &backend-base
+  build:
+    dockerfile: ./docker/Dockerfile
+    context: ./backend
+    target: dev
+  image: memegenerator/backend:dev
+  env_file: ".env"
+  volumes:
+    - ${DATA_FOLDER:?}:/app/data
+
 services:
   traefik:
     image: traefik:v3.6.12
@@ -23,23 +33,12 @@ services:
           - keycloak.localhost
 
   migrate:
-    build:
-      dockerfile: ./docker/Dockerfile
-      context: ./backend
-      target: dev
-    image: memegenerator/backend:dev
+    <<: *backend-base
     command: just migrate
     restart: "no"
-    env_file: ".env"
-    volumes:
-      - ${DATA_FOLDER:?}:/app/data
 
   backend:
-    build:
-      dockerfile: ./docker/Dockerfile
-      context: ./backend
-      target: dev
-    image: memegenerator/backend:dev
+    <<: *backend-base
     healthcheck:
       test:
         [
@@ -67,7 +66,6 @@ services:
       traefik.http.services.backend.loadbalancer.server.port: 8000
     networks:
       - public-network
-    env_file: ".env"
     volumes:
       - ${DATA_FOLDER:?}:/app/data
       - ${STATIC_FOLDER:?}:/app/static
