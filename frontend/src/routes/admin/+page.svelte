@@ -4,6 +4,7 @@
 	import type { Template } from '$lib/types';
 	import TemplateCard from '$lib/components/TemplateCard.svelte';
 	import PaginationBar from '$lib/components/PaginationBar.svelte';
+	import AppHeader from '$lib/components/AppHeader.svelte';
 
 	const PAGE_SIZE = 40;
 
@@ -108,12 +109,7 @@
 </script>
 
 <div class="min-h-screen bg-gray-50">
-	<header class="border-b border-gray-200 bg-white px-6 py-4">
-		<div class="mx-auto flex max-w-5xl items-center justify-between">
-			<h1 class="text-xl font-semibold text-gray-900">Template Admin</h1>
-			<a href="/" class="text-sm text-indigo-600 hover:underline">← Back to editor</a>
-		</div>
-	</header>
+	<AppHeader />
 
 	<main class="mx-auto max-w-5xl px-6 py-8">
 		<div class="mb-6 flex items-center gap-4">

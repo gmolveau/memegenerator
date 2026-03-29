@@ -2,84 +2,14 @@
 
 A fullstack webapp meme generator.
 
-The meme editor is only on the frontend. The backend serves the templates.
+Browse a library of image templates, compose text and image overlays on a canvas, apply image effects, and download the result as a JPG.
 
 ## Stack
 
-- backend: fastapi
-- frontend: svelte
+- **Backend**: FastAPI + SQLAlchemy + Alembic (Python) + SQLite
+- **Frontend**: SvelteKit + Svelte 5 + Tailwind CSS
+- **Auth**: OIDC (keycloak in dev mode)
 
-## Getting started
+## Developers
 
-<details>
-<summary>Install uv</summary>
-
-[uv](https://docs.astral.sh/uv/) is required to manage Python dependencies.
-
-On macOS/Linux:
-
-```sh
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-On Windows:
-
-```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
-
-</details>
-
-<details>
-<summary>Install pnpm</summary>
-
-[pnpm](https://pnpm.io/) is required to manage frontend dependencies.
-
-On macOS/Linux:
-
-```sh
-curl -fsSL https://get.pnpm.io/install.sh | sh -
-```
-
-On macOS :
-
-```sh
-brew install pnpm
-```
-
-On Windows:
-
-```powershell
-iwr https://get.pnpm.io/install.ps1 -useb | iex
-```
-
-Or via npm:
-
-```sh
-npm install -g pnpm
-```
-
-</details>
-
-- In terminal 1 :
-
-```bash
-cd backend
-just install-dev
-just migrate
-just run-dev
-```
-
-- In terminal 2 :
-
-```bash
-cd frontend
-just install-dev
-just run-dev
-```
-
-- In terminal 3 :
-
-```bash
-just run-keycloak
-```
+See [`docs/dev.md`](docs/dev.md) for full architecture and developer guide.
