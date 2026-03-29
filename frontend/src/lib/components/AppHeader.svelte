@@ -10,7 +10,7 @@
 			<a href={resolve('/')} class="text-xl font-bold tracking-tight text-indigo-700"
 				>Meme Generator</a
 			>
-			<span class="text-xs text-gray-400">v{__APP_VERSION__}</span>
+			<span class="text-xs text-gray-400">{__APP_VERSION__}</span>
 		</div>
 		<div class="flex items-center gap-4">
 			{#if auth.user}

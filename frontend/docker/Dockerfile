@@ -26,8 +26,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store just install-prod && just buil
 
 FROM base AS prod
 WORKDIR /app
+COPY --from=build-prod /app/node_modules /app/node_modules
 COPY --from=build-prod /app/build /app/build
 COPY --from=build-prod /app/package.json /app/package.json
-RUN npm install dotenv@17.3.1
 EXPOSE 3000
 CMD [ "node", "-r", "dotenv/config", "build" ]

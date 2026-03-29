@@ -25,7 +25,7 @@ CMD ["just", "run-dev"]
 
 FROM base AS prod
 
-ARG APP_VERSION=dev
+ARG APP_VERSION
 ENV APP_VERSION=$APP_VERSION
 
 WORKDIR /app
