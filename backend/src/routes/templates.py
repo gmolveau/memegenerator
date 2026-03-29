@@ -3,6 +3,7 @@
 import json
 from typing import Annotated
 
+import structlog
 from fastapi import APIRouter, Form, HTTPException, Query, UploadFile
 
 from src.dependencies import (
@@ -22,6 +23,7 @@ from src.services import templates as template_service
 from src.storage.disk import StorageDisk
 
 router = APIRouter(prefix="/templates", tags=["templates"])
+logger = structlog.get_logger(__name__)
 
 
 def _to_response(t: Template, disk: StorageDisk) -> TemplateResponse:
@@ -108,6 +110,12 @@ def upload_template(
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    logger.info(
+        "template.created",
+        template_id=template.id,
+        name=template.name,
+        creator_id=current_user.id,
+    )
     return _to_response(template, disk)
 
 
@@ -167,3 +175,4 @@ def delete_template(
 
     if not template_service.delete_template(db, disk, template_id):
         raise HTTPException(status_code=404, detail="Template not found")
+    logger.info("template.deleted", template_id=template_id, actor_id=current_user.id)

@@ -2,6 +2,7 @@ import secrets
 from typing import Annotated
 from urllib.parse import urlparse
 
+import structlog
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import RedirectResponse
@@ -11,6 +12,8 @@ from starlette.responses import JSONResponse
 from src.config import get_settings
 from src.dependencies import SessionDep
 from src.services.users import get_effective_role, upsert_user
+
+logger = structlog.get_logger(__name__)
 
 oauth = OAuth()
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -64,6 +67,7 @@ async def authorize_endpoint(request: Request, db: SessionDep):
     group_names: list[str] = data["groups"]
 
     user = upsert_user(db, sub=sub, name=name, email=email, group_names=group_names)
+    logger.info("user.login", sub=sub, name=name, email=email)
 
     request.session["user"] = {
         "sub": sub,
@@ -89,6 +93,9 @@ async def authorize_endpoint(request: Request, db: SessionDep):
 
 @router.get("/logout")
 def logout(request: Request) -> JSONResponse:
+    user = request.session.get("user")
+    if user:
+        logger.info("user.logout", sub=user.get("sub"))
     request.session.clear()
     response = JSONResponse(content={"status": "logged out"})
     response.delete_cookie(
