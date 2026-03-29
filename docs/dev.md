@@ -91,18 +91,20 @@ just run-dev       # Vite dev server
 just run-keycloak  # ephemeral Keycloak container
 ```
 
-Keycloak is preloaded with 2 users :
-
-- `user:user` in the group `developers`
-- `admin:admin` in the group `sysadmins`
-
 The app is available at <http://localhost:5173>.
 
 Interactive API docs: <http://localhost:8000/api/docs>.
 
 Keycloak admin: <http://localhost:8080> (user: `keycloak` / password: `keycloak`).
 
----
+#### Authentication
+
+Keycloak is preloaded with 2 users :
+
+- `user:user` in the group `developers`
+- `admin:admin` in the group `sysadmins`
+
+Use the `cli` command `uv run manage.py users make-superadmin --email "admin@example.com"` to give the `superadmin` role to the Admin
 
 ## Architecture overview
 
@@ -356,6 +358,5 @@ Run `just` in any directory to see available targets.
 | --------------------------------- | -------------------------------------------------------- |
 | [docs/dev.md](dev.md)             | This file — architecture and getting started             |
 | [docs/env.md](env.md)             | All environment variables, defaults, and example configs |
-| [docs/admin.md](admin.md)         | Admin panel user guide                                   |
 | `http://localhost:8000/api/docs`  | Auto-generated OpenAPI / Swagger UI (backend running)    |
 | `http://localhost:8000/api/redoc` | ReDoc alternative API docs                               |

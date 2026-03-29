@@ -17,9 +17,9 @@ depends_on = None
 
 def upgrade() -> None:
     """Apply the migration."""
-    op.execute(sa.text("INSERT INTO roles (name) VALUES ('admin')"))
+    op.execute(sa.text("INSERT INTO roles (name) VALUES ('superadmin')"))
 
 
 def downgrade() -> None:
     """Reverse the migration."""
-    op.execute(sa.text("DELETE FROM roles WHERE name = 'admin'"))
+    op.execute(sa.text("DELETE FROM roles WHERE name = 'superadmin'"))

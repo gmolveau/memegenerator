@@ -1,9 +1,9 @@
 """User service — upsert users and groups from OIDC data."""
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from src.models import Group, User
+from src.models import Group, Role, User
 
 
 def _get_or_create_group(db: Session, name: str) -> Group:
@@ -14,13 +14,32 @@ def _get_or_create_group(db: Session, name: str) -> Group:
     return group
 
 
-def assign_role(db: Session, identifier: str, role_name: str) -> User | None:
-    """Assign a role to a user looked up by sub or name. Returns None if not found."""
-    from src.models import Role  # avoid circular at module level
+def assign_role(
+    db: Session,
+    role_name: str,
+    *,
+    sub: str | None = None,
+    email: str | None = None,
+    name: str | None = None,
+    user_id: int | None = None,
+) -> User | None:
+    """Assign a role to a user looked up by any of sub, email, name, or id.
+    Returns None if not found."""
 
-    user = db.scalar(
-        select(User).where((User.sub == identifier) | (User.name == identifier))
-    )
+    conditions = []
+    if sub is not None:
+        conditions.append(User.sub == sub)
+    if email is not None:
+        conditions.append(User.email == email)
+    if name is not None:
+        conditions.append(User.name == name)
+    if user_id is not None:
+        conditions.append(user_id)
+
+    if not conditions:
+        return None
+
+    user = db.scalar(select(User).where(or_(*conditions)))
     if user is None:
         return None
 
