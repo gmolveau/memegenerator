@@ -42,6 +42,12 @@ localprod-stop:
 localprod-clean:
     docker compose -f compose.localprod.yml down --volumes
 
+### versioning
+
+bump-version bump:
+    cd backend && uv version --bump {{bump}}
+    npm --prefix frontend version {{bump}} --no-git-tag-version
+
 ### misc
 
 install-dev:

@@ -91,6 +91,11 @@ just run-dev       # Vite dev server
 just run-keycloak  # ephemeral Keycloak container
 ```
 
+Keycloak is preloaded with 2 users :
+
+- `user:user` in the group `developers`
+- `admin:admin` in the group `sysadmins`
+
 The app is available at <http://localhost:5173>.
 
 Interactive API docs: <http://localhost:8000/api/docs>.
