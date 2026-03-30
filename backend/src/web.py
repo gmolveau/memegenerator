@@ -18,7 +18,9 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.requests import Request
 
 from src.config import get_settings
+from src.database import database_engine
 from src.logging_setup import setup_logging
+from src.otel_setup import setup_otel
 from src.routes.auth import router as auth_router
 from src.routes.health import router as health_router
 from src.routes.templates import router as templates_router
@@ -48,7 +50,7 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    setup_logging(dev=settings.APP_ENV == "dev")
+    setup_logging(dev=settings.APP_ENV == "dev", log_level=settings.LOG_LEVEL)
 
     app: FastAPI = FastAPI(title="Meme Generator API", lifespan=lifespan)
 
@@ -81,6 +83,14 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    if settings.OTEL_ENABLED:
+        setup_otel(
+            app,
+            database_engine,
+            service_name=settings.OTEL_SERVICE_NAME,
+            otlp_endpoint=settings.OTEL_EXPORTER_OTLP_ENDPOINT,
+        )
 
     if isinstance(active_disk, LocalDisk):
         app.mount(

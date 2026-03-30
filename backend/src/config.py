@@ -25,6 +25,14 @@ class Settings(BaseSettings):
     # Rate limiting (slowapi format: "N/second|minute|hour|day")
     RATE_LIMIT: str
 
+    # Logging
+    LOG_LEVEL: str
+
+    # OpenTelemetry
+    OTEL_ENABLED: bool = False
+    OTEL_SERVICE_NAME: str = "memegenerator"
+    OTEL_EXPORTER_OTLP_ENDPOINT: str
+
 
 @lru_cache
 def get_settings() -> Settings:

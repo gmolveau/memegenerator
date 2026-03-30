@@ -29,6 +29,9 @@ dev-backend-shell:
 run-keycloak:
     docker run --rm -p 8080:8080 -e KEYCLOAK_ADMIN=keycloak -e KEYCLOAK_ADMIN_PASSWORD=keycloak -v ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json -v keycloakdata:/opt/keycloak/data quay.io/keycloak/keycloak:24.0.0 start-dev --import-realm
 
+run-jaeger:
+    docker run --rm -p 16686:16686 -p 4318:4318 -e COLLECTOR_OTLP_ENABLED=true jaegertracing/all-in-one:2
+
 ### docker compose fake prod stack
 
 localprod-up:

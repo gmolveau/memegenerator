@@ -64,6 +64,8 @@ Interactive API docs: <http://app.localhost/api/docs>.
 
 Keycloak: <http://keycloak.localhost>.
 
+Jaeger UI (traces): <http://jaeger.localhost>.
+
 #### Without Docker Compose
 
 Edit the Keycloak URL in `.env` and uncomment the variables with "without docker compose".
@@ -114,8 +116,10 @@ Browser
   ▼
 FastAPI  ──────  SQLite (SQLAlchemy / Alembic)
   │
-  └──  Storage disk  ──  Local FS  (default)
-                    └──  AWS S3 / S3-compatible  (optional)
+  ├──  Storage disk  ──  Local FS  (default)
+  │                 └──  AWS S3 / S3-compatible  (optional)
+  │
+  └──  OpenTelemetry (optional)  ──  Jaeger (OTLP/HTTP :4318)
 ```
 
 The frontend is a **pure client-side SPA** — it never does server-side rendering. All data comes from the backend API. Meme composition and JPG export happen entirely in the browser.
@@ -144,6 +148,7 @@ The frontend is a **pure client-side SPA** — it never does server-side renderi
 backend/src/
 ├── web.py               # App factory: CORS, middleware, router registration
 ├── config.py            # Settings loaded from environment via Pydantic
+├── otel_setup.py        # OpenTelemetry tracer provider + FastAPI/SQLAlchemy instrumentation
 ├── database.py          # Engine, session factory, get_db() dependency
 ├── dependencies.py      # Shared FastAPI dependencies (auth, current user)
 ├── models.py            # SQLAlchemy ORM models (User, Group, Role, Template)
@@ -206,6 +211,48 @@ The frontend calls `GET /api/auth/me` once on startup and caches the result in t
 ### Storage abstraction
 
 `StorageDisk` exposes four methods: `save`, `delete`, `url`, `ensure`. The active implementation is selected at startup from `STORAGE_DRIVER` and exposed as a FastAPI dependency via `get_disk()`. Add a new driver by subclassing `StorageDisk` and registering it in `storage/__init__.py`.
+
+### Observability (OpenTelemetry + Jaeger)
+
+The backend ships optional distributed tracing via [OpenTelemetry](https://opentelemetry.io/). When enabled, every HTTP request and every SQL query is automatically captured as a span and exported to a collector over OTLP/HTTP.
+
+**What gets instrumented**
+
+- FastAPI — one span per HTTP request (method, route, status code)
+- SQLAlchemy — one span per SQL statement
+- Structlog — active `trace_id` / `span_id` are injected into every log line automatically
+
+**Enable tracing**
+
+Set the following variables in your `.env`:
+
+```env
+OTEL_ENABLED=true
+OTEL_SERVICE_NAME=memegenerator          # label shown in Jaeger
+OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318   # or http://localhost:4318 outside Docker
+```
+
+**Jaeger (local dev)**
+
+Jaeger is included in `compose.yml` as the `all-in-one` image — it accepts OTLP/HTTP on port `4318` and serves the UI on port `16686`.
+
+```bash
+just dev-up   # starts Jaeger alongside the app
+```
+
+Open the Jaeger UI at <http://jaeger.localhost>, select the `memegenerator` service, and search traces.
+
+**How it works**
+
+`setup_otel()` in `src/otel_setup.py` is called from `create_app()` in `web.py` only when `OTEL_ENABLED=true`. It:
+
+1. Creates a `TracerProvider` with a `Resource` carrying the service name.
+2. Attaches a `BatchSpanProcessor` that exports to `<OTEL_EXPORTER_OTLP_ENDPOINT>/v1/traces`.
+3. Instruments FastAPI via `FastAPIInstrumentor` and SQLAlchemy via `SQLAlchemyInstrumentor`.
+
+The `add_otel_context` structlog processor (also in `otel_setup.py`) reads the active span at log time and appends `trace_id` / `span_id` fields — so log lines can be correlated with Jaeger traces.
+
+---
 
 ### Database migrations
 
@@ -356,7 +403,7 @@ Run `just` in any directory to see available targets.
 
 | File                              | Contents                                                 |
 | --------------------------------- | -------------------------------------------------------- |
-| [docs/dev.md](dev.md)             | This file — architecture and getting started             |
+| [docs/dev.md](dev.md)             | This file — architecture, getting started, observability |
 | [docs/env.md](env.md)             | All environment variables, defaults, and example configs |
 | `http://localhost:8000/api/docs`  | Auto-generated OpenAPI / Swagger UI (backend running)    |
 | `http://localhost:8000/api/redoc` | ReDoc alternative API docs                               |

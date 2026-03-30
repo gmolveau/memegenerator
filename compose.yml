@@ -119,6 +119,21 @@ services:
         - action: rebuild
           path: frontend/docker/Dockerfile
 
+  jaeger:
+    image: jaegertracing/all-in-one:1.76.0
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    expose:
+      - "4318"
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: public-network
+      traefik.http.routers.jaeger.rule: Host(`jaeger.localhost`)
+      traefik.http.routers.jaeger.service: jaeger
+      traefik.http.services.jaeger.loadbalancer.server.port: 16686
+    networks:
+      - public-network
+
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.0
     command: start-dev --import-realm
