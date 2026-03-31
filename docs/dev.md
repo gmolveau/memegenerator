@@ -401,9 +401,12 @@ Run `just` in any directory to see available targets.
 
 ## Documentation index
 
-| File                              | Contents                                                 |
-| --------------------------------- | -------------------------------------------------------- |
-| [docs/dev.md](dev.md)             | This file — architecture, getting started, observability |
-| [docs/env.md](env.md)             | All environment variables, defaults, and example configs |
-| `http://localhost:8000/api/docs`  | Auto-generated OpenAPI / Swagger UI (backend running)    |
-| `http://localhost:8000/api/redoc` | ReDoc alternative API docs                               |
+[docs/dev.md](dev.md) : This file — architecture, getting started, observability
+
+[docs/env.md](env.md) : All environment variables, defaults, and example configs
+
+[docs/deployment.md](deployment.md) : Production deployment guide
+
+<http://app.localhost/api/docs> : Auto-generated OpenAPI / Swagger UI (backend running)
+
+<http://app.localhost/api/redoc> : ReDoc alternative API docs
